@@ -186,15 +186,11 @@ add_executable(${PLSSVM_EXECUTABLE_TRAIN_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/m
 set(PLSSVM_EXECUTABLE_PREDICT_NAME svm-predict)
 add_executable(${PLSSVM_EXECUTABLE_PREDICT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/main_predict.cpp)
 
-target_link_libraries(${PLSSVM_EXECUTABLE_TRAIN_NAME} ${MPI_LIBRARIES})
-set_target_properties(${PLSSVM_EXECUTABLE_TRAIN_NAME} PROPERTIES
+target_link_libraries(${PLSSVM_BASE_LIBRARY_NAME}  PUBLIC ${MPI_LIBRARIES})
+set_target_properties(${PLSSVM_BASE_LIBRARY_NAME} PROPERTIES
     COMPILE_FLAGS "${MPI_COMPILE_FLAGS}"
     LINK_FLAGS "${MPI_LINK_FLAGS}")
 
-target_link_libraries(${PLSSVM_EXECUTABLE_PREDICT_NAME} ${MPI_LIBRARIES})
-set_target_properties(${PLSSVM_EXECUTABLE_PREDICT_NAME} PROPERTIES
-    COMPILE_FLAGS "${MPI_COMPILE_FLAGS}"
-    LINK_FLAGS "${MPI_LINK_FLAGS}")
 
 ## append executables to installed targets
 list(APPEND PLSSVM_TARGETS_TO_INSTALL ${PLSSVM_EXECUTABLE_TRAIN_NAME} ${PLSSVM_EXECUTABLE_PREDICT_NAME})
@@ -434,12 +430,6 @@ endif()
 ########################################################################################################################
 option(PLSSVM_ENABLE_TESTING "Build tests for all backends." ON)
 if(PLSSVM_ENABLE_TESTING)
-	find_package(mpicxx CONFIG REQUIRED)
-	if(mpicxx_FOUND)
-		message(STATUS "Found package mpicxx.")
-	endif()
-
-	target_link_libraries(${PLSSVM_BASE_LIBRARY_NAME} PUBLIC mpicxx::mpicxx)
 
     enable_testing()
     add_subdirectory(tests)
