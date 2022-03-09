@@ -101,6 +101,7 @@ TYPED_TEST(OpenMP_CSVM, device_kernel) {
     const std::vector<real_type> q_vec = compare::generate_q<TypeParam::kernel>(csvm.get_data(), csvm);
     const real_type cost = csvm.get_cost();
     const real_type QA_cost = compare::kernel_function<TypeParam::kernel>(csvm.get_data().back(), csvm.get_data().back(), csvm) + 1 / cost;
+    const std::vector<std::vector<std::vector<int>>> bounds = *params.bounds_ptr;
 
     // create C-SVM using the OpenMP backend
     mock_openmp_csvm csvm_openmp{ params };
@@ -114,7 +115,7 @@ TYPED_TEST(OpenMP_CSVM, device_kernel) {
         std::vector<real_type> calculated(dept, 0.0);
         csvm_openmp.set_QA_cost(QA_cost);
         csvm_openmp.set_cost(cost);
-        csvm_openmp.run_device_kernel(q_vec, calculated, x, csvm_openmp.get_device_data(), add);
+        csvm_openmp.run_device_kernel(q_vec, calculated, x, csvm_openmp.get_device_data(), add, bounds);
 
         ASSERT_EQ(correct.size(), calculated.size()) << "add: " << add;
         for (typename std::vector<real_type>::size_type index = 0; index < correct.size(); ++index) {

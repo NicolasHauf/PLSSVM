@@ -47,6 +47,7 @@ class csvm : public ::plssvm::csvm<T> {
     using base_type::QA_cost_;
     using base_type::target_;
     using base_type::w_;
+    using base_type::bounds_ptr_;
 
   public:
     /// The type of the data. Must be either `float` or `double`.
