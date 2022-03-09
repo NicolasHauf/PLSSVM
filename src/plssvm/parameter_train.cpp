@@ -25,6 +25,48 @@
 
 namespace plssvm {
 
+void compute_bounds(int n, int world_size, std::vector<std::vector<std::vector<int>>> &ret) {
+    
+    int u = floor(sqrt(2 * world_size + 0.25) - 0.5) + 1;
+    int box_size = ceil(n / static_cast<float>(u)); 
+
+    int cur_thread = 0;
+   
+    for (int j = 0; j < u - 1; j++) {
+        for (int i = j + 1; i < u; i++) {
+            ret.push_back(std::vector<std::vector<int>>{
+                { box_size * i, box_size * (i + 1), box_size * j, box_size * (j + 1) },
+                { box_size * i, box_size * (i + 1), box_size * j, box_size * (j + 1) }
+            });
+            cur_thread++;
+        }
+    }
+
+    for (int ij = 0; ij < u; ij += 2) {
+        if (cur_thread > world_size - 1) {
+            ret[cur_thread % world_size].push_back(std::vector<int>{ box_size * ij, box_size * (ij + 1), box_size * ij, box_size * (ij + 1) });
+            ret[cur_thread % world_size].push_back(std::vector<int>{ box_size * (ij + 1), box_size * (ij + 2), box_size * (ij + 1), box_size * (ij + 2) });
+            ret.push_back(std::vector<std::vector<int>>{
+                { box_size * ij, box_size * (ij + 2), 0, 0 } 
+            });
+        } else {
+            ret.push_back(std::vector<std::vector<int>>{
+                { box_size * ij, box_size * (ij + 2), 0, 0 },
+                { box_size * ij, box_size * (ij + 1), box_size * ij, box_size * (ij + 1) },
+                { box_size * (ij + 1), box_size * (ij + 2), box_size * (ij + 1), box_size * (ij + 2) } });
+        }
+        cur_thread++;
+    }
+
+    for (cur_thread; cur_thread < world_size; cur_thread++) {
+        ret.push_back(std::vector<std::vector<int>>{
+            { 0, 0, 0, 0 }
+        });
+    }
+}
+
+
+
 template <typename T>
 parameter_train<T>::parameter_train(std::string p_input_filename) {
     base_type::input_filename = std::move(p_input_filename);
@@ -138,77 +180,12 @@ parameter_train<T>::parameter_train(int argc, char **argv) {
     }
 
     MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    
+    std::vector<std::vector<std::vector<int>>> bounds;
 
-    int t = world_size;
-    int wh = t / 2;
+    compute_bounds(n, world_size, bounds);
 
-    for (int i = 0; i < world_size; ++i) {
-        int lBI1 = 0;
-        int uBI1 = 0;
-        int lBJ1 = 0;
-        int uBJ1 = 0;
-
-        int lBI2 = 0;
-        int uBI2 = 0;
-        int lBJ2 = 0;
-        int uBJ2 = 0;
-
-        int min1 = 0;
-        int max1 = 0;
-        int min2 = 0;
-        int max2 = 0;
-
-
-        if (i < wh) {
-            lBI1 = n * (i) / (wh * 2);
-            uBI1 = n * (i + 1) / (wh * 2);
-            lBJ1 = 0;
-            uBJ1 = n / 2;
-
-            if (t % 2 == 1) {
-                wh++;
-            }
-            lBI2 = n * (t - i - 1) / (wh * 2);
-            uBI2 = n * (t - i) / (wh * 2);
-
-            lBJ2 = n / 2;
-            uBJ2 = n;
-
-            min1 = 0;
-            max1 = uBI1;
-            min2 = n / 2;
-            max2 = uBI2;
-
-        } else {
-            if (t % 2 == 1) {
-                wh++;
-            }
-            lBI1 = n * (i) / (wh * 2);
-            uBI1 = n * (i + 1) / (wh * 2);
-            lBJ1 = 0;
-            uBJ1 = n / 2;
-            
-            min1 = 0;
-            max1 = n / 2;
-            min2 = lBI1;
-            max2 = uBI1;
-        }
-        
-        bounds.push_back(std::vector<int>{
-            lBI1, uBI1, lBJ1, uBJ1, lBI2, uBI2, lBJ2, uBJ2, min1, max1, min2, max2
-        });     
-    }
-        
-    /*
-    if (rank == 0) {
-        for (int i = 0; i < bounds.size(); i++) {
-            for (int j = 0; j < bounds[0].size(); j++) {
-                std::cout << bounds[i][j] << ",  ";
-            }
-            std::cout << std::endl;
-        }
-    }
-    */
+    bounds_ptr = std::make_shared<const std::vector<std::vector<std::vector<int>>>>(std::move(bounds));
 }
 
 // explicitly instantiate template class

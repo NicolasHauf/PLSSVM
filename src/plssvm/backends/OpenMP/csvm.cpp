@@ -64,16 +64,16 @@ auto csvm<T>::generate_q() -> std::vector<real_type> {
 }
 
 template <typename T>
-void csvm<T>::run_device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret, const std::vector<real_type> &d, const std::vector<std::vector<real_type>> &data, const real_type add) {
+void csvm<T>::run_device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret, const std::vector<real_type> &d, const std::vector<std::vector<real_type>> &data, const real_type add, const std::vector<std::vector<std::vector<int>>> &bounds) {
     switch (kernel_) {
         case kernel_type::linear:
-            openmp::device_kernel_linear(q, ret, d, data, QA_cost_, 1 / cost_, add);
+            openmp::device_kernel_linear(q, ret, d, data, QA_cost_, 1 / cost_, add, bounds);
             break;
         case kernel_type::polynomial:
-            openmp::device_kernel_poly(q, ret, d, data, QA_cost_, 1 / cost_, add, degree_, gamma_, coef0_);
+            openmp::device_kernel_poly(q, ret, d, data, QA_cost_, 1 / cost_, add, bounds, degree_, gamma_, coef0_);
             break;
         case kernel_type::rbf:
-            openmp::device_kernel_radial(q, ret, d, data, QA_cost_, 1 / cost_, add, gamma_);
+            openmp::device_kernel_radial(q, ret, d, data, QA_cost_, 1 / cost_, add, bounds, gamma_);
             break;
     }
 }
@@ -96,8 +96,10 @@ auto csvm<T>::solver_CG(const std::vector<real_type> &b, const std::size_t imax,
 
     std::vector<real_type> r(b);
 
+    const std::vector<std::vector<std::vector<int>>> bounds = *bounds_ptr_;
+
     // solve: r = b - (A * alpha_)
-    run_device_kernel(q, r, alpha, *data_ptr_, -1);
+    run_device_kernel(q, r, alpha, *data_ptr_, -1, bounds);
 
     // delta = r.T * r
     real_type delta = transposed{ r } * r;
@@ -118,7 +120,7 @@ auto csvm<T>::solver_CG(const std::vector<real_type> &b, const std::size_t imax,
 
         MPI_Bcast(&d[0], d.size(), mpi_real_type, 0, MPI_COMM_WORLD);
 
-        run_device_kernel(q, Ad, d, *data_ptr_, 1);
+        run_device_kernel(q, Ad, d, *data_ptr_, 1, bounds);
 
         if (rank == 0) {
             // (alpha = delta_new / (d^T * q))
@@ -133,10 +135,10 @@ auto csvm<T>::solver_CG(const std::vector<real_type> &b, const std::size_t imax,
             // r -= A * x
         }
 
-        MPI_Bcast(&r[0], r.size(), mpi_real_type, 0, MPI_COMM_WORLD);
-        MPI_Bcast(&alpha[0], alpha.size(), mpi_real_type, 0, MPI_COMM_WORLD);
+        MPI_Bcast(&r[0], dept, mpi_real_type, 0, MPI_COMM_WORLD);
+        MPI_Bcast(&alpha[0], dept, mpi_real_type, 0, MPI_COMM_WORLD);
 
-        run_device_kernel(q, r, alpha, *data_ptr_, -1);
+        run_device_kernel(q, r, alpha, *data_ptr_, -1, bounds);
 
         // (delta = r^T * r)
         const real_type delta_old = delta;
@@ -162,7 +164,7 @@ auto csvm<T>::solver_CG(const std::vector<real_type> &b, const std::size_t imax,
         fmt::print("Finished after {} iterations with a residuum of {} (target: {}).\n", run + 1, delta, eps * eps * delta0);
     }
 
-    MPI_Bcast(&alpha[0], alpha.size(), mpi_real_type, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&alpha[0], dept, mpi_real_type, 0, MPI_COMM_WORLD);
 
     return alpha;
 }

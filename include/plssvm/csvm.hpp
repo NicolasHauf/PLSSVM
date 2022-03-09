@@ -262,7 +262,7 @@ class csvm {
     /// The result of the CG calculation: the weights of the support vectors.
     std::shared_ptr<const std::vector<real_type>> alpha_ptr_{};
     /// tbd
-    std::vector<std::vector<int>> bounds_;
+    std::shared_ptr<const std::vector<std::vector<std::vector<int>>>> bounds_ptr_{};
 
     //*************************************************************************************************************************************//
     //                                                         internal variables                                                          //

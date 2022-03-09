@@ -206,8 +206,8 @@ class parameter {
     std::shared_ptr<const std::vector<real_type>> alpha_ptr{};
     /// The test data to predict.
     std::shared_ptr<const std::vector<std::vector<real_type>>> test_data_ptr{};
-    /// tbd
-    std::vector<std::vector<int>> bounds;
+    /// The upper and lower bounds regarding data multiplication for each thread
+    std::shared_ptr<const std::vector<std::vector<std::vector<int>>>> bounds_ptr{};
 
     /// The rho value of the calculated/read model.
     real_type rho = real_type{ 0.0 };

@@ -45,7 +45,7 @@ class parameter_train : public parameter<T> {
     using base_type::data_ptr;
     using base_type::test_data_ptr;
     using base_type::value_ptr;
-    using base_type::bounds;
+    using base_type::bounds_ptr;
 
     using base_type::rho;
 
