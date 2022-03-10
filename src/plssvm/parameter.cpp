@@ -33,12 +33,51 @@
 #include <utility>      // std::move, std::pair
 #include <vector>       // std::vector
 
+#include <iostream>
+#include <mpi.h>
+
 namespace plssvm {
+
+void compute_bounds(int n, int world_size, std::vector<std::vector<std::vector<int>>> &ret) {
+    int u = floor(sqrt(2 * world_size + 0.25) - 0.5) + 1;
+    int box_size = ceil(n / static_cast<float>(u));
+
+    int cur_thread = 0;
+
+    for (int j = 0; j < u - 1; j++) {
+        for (int i = j + 1; i < u; i++) {
+            ret.push_back(std::vector<std::vector<int>>{
+                { box_size * i, box_size * (i + 1), box_size * j, box_size * (j + 1) },
+                { box_size * i, box_size * (i + 1), box_size * j, box_size * (j + 1) } });
+            cur_thread++;
+        }
+    }
+
+    for (int ij = 0; ij < u; ij += 2) {
+        if (cur_thread > world_size - 1) {
+            ret[cur_thread % world_size].push_back(std::vector<int>{ box_size * ij, box_size * (ij + 1), box_size * ij, box_size * (ij + 1) });
+            ret[cur_thread % world_size].push_back(std::vector<int>{ box_size * (ij + 1), box_size * (ij + 2), box_size * (ij + 1), box_size * (ij + 2) });
+            ret.push_back(std::vector<std::vector<int>>{
+                { box_size * ij, box_size * (ij + 2), 0, 0 } });
+        } else {
+            ret.push_back(std::vector<std::vector<int>>{
+                { box_size * ij, box_size * (ij + 2), 0, 0 },
+                { box_size * ij, box_size * (ij + 1), box_size * ij, box_size * (ij + 1) },
+                { box_size * (ij + 1), box_size * (ij + 2), box_size * (ij + 1), box_size * (ij + 2) } });
+        }
+        cur_thread++;
+    }
+
+    for (cur_thread; cur_thread < world_size; cur_thread++) {
+        ret.push_back(std::vector<std::vector<int>>{
+            { 0, 0, 0, 0 } });
+    }
+}
 
 namespace detail {
 
 template <typename real_type>
-void parse_libsvm_content(const file_reader &f, const std::size_t start, std::vector<std::vector<real_type>> &data, std::vector<real_type> &values) {
+void parse_libsvm_content(const file_reader &f, const std::size_t start, const std::size_t lower_bound, const std::size_t upper_bound, std::vector<std::vector<real_type>> &data, std::vector<real_type> &values) {
     std::size_t max_size = 0;
     std::exception_ptr parallel_exception;
 
@@ -46,7 +85,7 @@ void parse_libsvm_content(const file_reader &f, const std::size_t start, std::ve
     {
         #pragma omp for reduction(max \
                           : max_size)
-        for (typename std::vector<std::vector<real_type>>::size_type i = 0; i < data.size(); ++i) {
+        for (typename std::vector<std::vector<real_type>>::size_type i = lower_bound; i < upper_bound; ++i) {
             #pragma omp cancellation point for
             try {
                 std::string_view line = f.line(i + start);
@@ -108,11 +147,6 @@ void parse_libsvm_content(const file_reader &f, const std::size_t start, std::ve
     if (max_size == 0) {
         throw invalid_file_format_exception{ fmt::format("Can't parse file: no data points are given!") };
     }
-
-    #pragma omp parallel for
-    for (typename std::vector<std::vector<real_type>>::size_type i = 0; i < data.size(); ++i) {
-        data[i].resize(max_size);
-    }
 }
 
 }  // namespace detail
@@ -144,7 +178,35 @@ void parameter<T>::parse_libsvm_file(const std::string &filename, std::shared_pt
     std::vector<std::vector<real_type>> data(f.num_lines());
     std::vector<real_type> value(f.num_lines());
 
-    detail::parse_libsvm_content(f, 0, data, value);
+    int init, rank, world_size;
+    MPI_Initialized(&init);
+    
+    if (init == 1) {
+        MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    }
+
+    if (init == 0) {
+        detail::parse_libsvm_content(f, 0, 0, data.size() ,data, value);
+    } else if (init == 1) {
+        std::vector<std::vector<std::vector<int>>> bounds;
+        compute_bounds(f.num_lines(), world_size, bounds);
+        if (rank == 0) {
+            detail::parse_libsvm_content(f, 0, 0, data.size(), data, value);
+        } else {
+            for (int i = 0; i < bounds.size(); i++) {
+                if (i % world_size == rank) {
+                    if (bounds[i][0][2] < bounds[i][0][1] && bounds[i][0][0] < data.size()) {
+                        detail::parse_libsvm_content(f, 0, bounds[i][0][0], std::min(bounds[i][0][1], int(data.size())), data, value);
+                    }
+                    if (bounds[i][0][2] < bounds[i][0][3] && bounds[i][0][2] < data.size()) {
+                        detail::parse_libsvm_content(f, 0, bounds[i][0][2], std::min(bounds[i][0][3], int(data.size())), data, value);
+                    }
+                }
+            }
+        }
+        bounds_ptr = std::make_shared<const std::vector<std::vector<std::vector<int>>>>(std::move(bounds));
+    }
 
     // update gamma
     if (gamma == real_type{ 0.0 }) {
@@ -501,7 +563,7 @@ void parameter<T>::parse_model_file(const std::string &filename) {
     std::vector<real_type> alphas(num_sv);
 
     // parse support vectors
-    detail::parse_libsvm_content(f, header + 1, data, alphas);
+    detail::parse_libsvm_content(f, header + 1, 0, data.size(), data, alphas);
 
     // update shared pointer
     data_ptr = std::make_shared<const std::vector<std::vector<real_type>>>(std::move(data));

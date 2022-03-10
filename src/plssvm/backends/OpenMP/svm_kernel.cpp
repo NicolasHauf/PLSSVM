@@ -33,8 +33,6 @@ void device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret,
     MPI_Datatype mpi_real_type;
     MPI_Type_match_size(MPI_TYPECLASS_REAL, sizeof(real_type), &mpi_real_type);
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
     // only root rank remembers the right side of the equation
     if (rank != 0) {
         std::fill(ret.begin(), ret.end(), real_type{ 0.0 });
@@ -92,7 +90,7 @@ void device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret,
   
     for (int i = 0; i < world_size; i++) {
         if (i == rank) {
-            std::cout << rank << " ; " << compTime - startTime << " ; " << sendTime - compTime << " ; " << sendTime - startTime << " ; " << comparrisonCount << std::endl;
+            //std::cout << rank << " ; " << compTime - startTime << " ; " << sendTime - compTime << " ; " << sendTime - startTime << " ; " << comparrisonCount << std::endl;
         }
         MPI_Barrier(MPI_COMM_WORLD);
     }

@@ -25,48 +25,6 @@
 
 namespace plssvm {
 
-void compute_bounds(int n, int world_size, std::vector<std::vector<std::vector<int>>> &ret) {
-    
-    int u = floor(sqrt(2 * world_size + 0.25) - 0.5) + 1;
-    int box_size = ceil(n / static_cast<float>(u)); 
-
-    int cur_thread = 0;
-   
-    for (int j = 0; j < u - 1; j++) {
-        for (int i = j + 1; i < u; i++) {
-            ret.push_back(std::vector<std::vector<int>>{
-                { box_size * i, box_size * (i + 1), box_size * j, box_size * (j + 1) },
-                { box_size * i, box_size * (i + 1), box_size * j, box_size * (j + 1) }
-            });
-            cur_thread++;
-        }
-    }
-
-    for (int ij = 0; ij < u; ij += 2) {
-        if (cur_thread > world_size - 1) {
-            ret[cur_thread % world_size].push_back(std::vector<int>{ box_size * ij, box_size * (ij + 1), box_size * ij, box_size * (ij + 1) });
-            ret[cur_thread % world_size].push_back(std::vector<int>{ box_size * (ij + 1), box_size * (ij + 2), box_size * (ij + 1), box_size * (ij + 2) });
-            ret.push_back(std::vector<std::vector<int>>{
-                { box_size * ij, box_size * (ij + 2), 0, 0 } 
-            });
-        } else {
-            ret.push_back(std::vector<std::vector<int>>{
-                { box_size * ij, box_size * (ij + 2), 0, 0 },
-                { box_size * ij, box_size * (ij + 1), box_size * ij, box_size * (ij + 1) },
-                { box_size * (ij + 1), box_size * (ij + 2), box_size * (ij + 1), box_size * (ij + 2) } });
-        }
-        cur_thread++;
-    }
-
-    for (cur_thread; cur_thread < world_size; cur_thread++) {
-        ret.push_back(std::vector<std::vector<int>>{
-            { 0, 0, 0, 0 }
-        });
-    }
-}
-
-
-
 template <typename T>
 parameter_train<T>::parameter_train(std::string p_input_filename) {
     base_type::input_filename = std::move(p_input_filename);
@@ -172,20 +130,7 @@ parameter_train<T>::parameter_train(int argc, char **argv) {
         model_filename = base_type::model_name_from_input();
     }
 
-    int n = 0;
-
-    if (rank == 0) {
-        base_type::parse_train_file(input_filename);
-        n = data_ptr->size() - 1;
-    }
-
-    MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    
-    std::vector<std::vector<std::vector<int>>> bounds;
-
-    compute_bounds(n, world_size, bounds);
-
-    bounds_ptr = std::make_shared<const std::vector<std::vector<std::vector<int>>>>(std::move(bounds));
+    base_type::parse_train_file(input_filename);
 }
 
 // explicitly instantiate template class

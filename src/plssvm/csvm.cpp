@@ -42,10 +42,8 @@ template <typename T>
 csvm<T>::csvm(const parameter<T> &params) :
     target_{ params.target }, kernel_{ params.kernel }, degree_{ params.degree }, gamma_{ params.gamma }, coef0_{ params.coef0 }, cost_{ params.cost }, epsilon_{ params.epsilon }, print_info_{ params.print_info }, data_ptr_{ params.data_ptr }, value_ptr_{ params.value_ptr }, alpha_ptr_{ params.alpha_ptr }
     , bounds_ptr_{ params.bounds_ptr }, bias_{ -params.rho } {
-    
-    int rank = -1;
 
-    int init = -1;
+    int init, rank;
     MPI_Initialized(&init);
     
     if (init == 1) {
@@ -57,8 +55,6 @@ csvm<T>::csvm(const parameter<T> &params) :
             throw exception{ "No data points provided!" };
         } else if (data_ptr_->empty()) {
             throw exception{ "Data set is empty!" };
-        } else if (!std::all_of(data_ptr_->begin(), data_ptr_->end(), [&](const std::vector<real_type> &point) { return point.size() == data_ptr_->front().size(); })) {
-            throw exception{ "All points in the data vector must have the same number of features!" };
         } else if (data_ptr_->front().empty()) {
             throw exception{ "No features provided for the data points!" };
         } else if (alpha_ptr_ != nullptr && alpha_ptr_->size() != data_ptr_->size()) {
@@ -222,7 +218,6 @@ void csvm<T>::learn() {
     MPI_Bcast(&num_data_points_, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&num_features_, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-
     std::vector<real_type> q(num_data_points_ - 1, 0);
     std::vector<real_type> b(num_data_points_ - 1, 0);
 
@@ -272,40 +267,6 @@ void csvm<T>::learn() {
     MPI_Bcast(&q[0], q.size(), mpi_real_type, 0, MPI_COMM_WORLD);
     MPI_Bcast(&b[0], b.size(), mpi_real_type, 0, MPI_COMM_WORLD);
     MPI_Bcast(&QA_cost_, 1, mpi_real_type, 0, MPI_COMM_WORLD);
-
-    std::vector<std::vector<real_type>> data(num_data_points_);
-
-    if (rank == 0) {
-        data = *data_ptr_;
-    }
-
-    std::vector<std::vector<std::vector<int>>> bounds = *bounds_ptr_;
-
-    MPI_Status status;
-
-    for (int i = 0; i < num_data_points_; ++i) {  
-        if (rank == 0) {
-            for (int j = 1; j < bounds.size(); ++j) {
-                //std::cout << j << " ; " << bounds[j][0][1] << std::endl;
-                if (((i >= bounds[j][0][0] && i < bounds[j][0][1]) || (i >= bounds[j][0][2] && i <= bounds[j][0][3])) && j % world_size != 0 && i < num_data_points_) {
-                    MPI_Send(&data[i][0], num_features_, mpi_real_type, j % world_size, 0, MPI_COMM_WORLD);
-                }
-            }
-        } else {
-            if (((i >= bounds[rank][0][0] && i < bounds[rank][0][1]) || (i >= bounds[rank][0][2] && i <= bounds[rank][0][3])) && i < num_data_points_) {
-                data[i].resize(num_features_, 0);
-                MPI_Recv(&data[i][0], num_features_, mpi_real_type, 0, 0, MPI_COMM_WORLD, &status);
-            }
-            if ( rank + world_size < bounds.size() && ((i >= bounds[rank + world_size][0][0] && i < bounds[rank + world_size][0][1]) || (i >= bounds[rank + world_size][0][2] && i <= bounds[rank + world_size][0][3])) && i < num_data_points_) {
-                data[i].resize(num_features_, 0);
-                MPI_Recv(&data[i][0], num_features_, mpi_real_type, 0, 0, MPI_COMM_WORLD, &status);
-            }
-        }
-    }
-
-    data_ptr_ = std::make_shared<const std::vector<std::vector<real_type>>>(std::move(data));
-
-    MPI_Barrier(MPI_COMM_WORLD);
 
     auto start_time = std::chrono::steady_clock::now();
     
