@@ -40,8 +40,8 @@ void device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret,
 
     int comparrisonCount = 0;
 
-    double startTime = MPI_Wtime();
-    for (int bounds_set = 1; bounds_set < bounds[rank].size(); bounds_set++) {
+    //double startTime = MPI_Wtime();
+    for (int bounds_set = 1; bounds_set < int(bounds[rank].size()); bounds_set++) {
         std::vector<int> current_bounds = bounds[rank][bounds_set];
         #pragma omp parallel for collapse(2) schedule(dynamic)
         for (kernel_index_type i = current_bounds[0]; i < current_bounds[1]; i += OPENMP_BLOCK_SIZE) {
@@ -71,22 +71,22 @@ void device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret,
         }
     }
 
-    double compTime = MPI_Wtime();
+    //double compTime = MPI_Wtime();
 
     if (rank != 0) {
         MPI_Send(&ret[0], ret.size(), mpi_real_type, 0, 1, MPI_COMM_WORLD);
     } else {
         MPI_Status status;
         std::vector<real_type> temp_ret(ret.size());
-        for (kernel_index_type i = 1; i < world_size; ++i) {
+        for (int i = 1; i < world_size; ++i) {
             MPI_Recv(&temp_ret[0], temp_ret.size(), mpi_real_type, i, 1, MPI_COMM_WORLD, &status);
-            for (kernel_index_type j = 0; j < temp_ret.size(); ++j) {
+            for (typename std::vector<real_type>::size_type j = 0; j < temp_ret.size(); ++j) {
                 ret[j] += temp_ret[j];
             }
         }
     }
 
-    double sendTime = MPI_Wtime();
+    //double sendTime = MPI_Wtime();
   
     for (int i = 0; i < world_size; i++) {
         if (i == rank) {

@@ -68,7 +68,7 @@ void compute_bounds(int n, int world_size, std::vector<std::vector<std::vector<i
         cur_thread++;
     }
 
-    for (cur_thread; cur_thread < world_size; cur_thread++) {
+    for (; cur_thread < world_size; cur_thread++) {
         ret.push_back(std::vector<std::vector<int>>{
             { 0, 0, 0, 0 } });
     }
@@ -77,7 +77,57 @@ void compute_bounds(int n, int world_size, std::vector<std::vector<std::vector<i
 namespace detail {
 
 template <typename real_type>
-void parse_libsvm_content(const file_reader &f, const std::size_t start, const std::size_t lower_bound, const std::size_t upper_bound, std::vector<std::vector<real_type>> &data, std::vector<real_type> &values) {
+void parse_libsvm_line(const file_reader &f, const int start, std::vector<std::vector<real_type>> &data, std::vector<real_type> &values, const int line_number, std::size_t &max_size, std::exception_ptr &parallel_exception) {
+    try {
+        std::string_view line = f.line(line_number + start);
+
+        // check if class labels are present (not necessarily the case for test files)
+        std::string_view::size_type pos = line.find_first_of(" \n");
+        std::string_view::size_type first_colon = line.find_first_of(":\n");
+        if (first_colon >= pos) {
+            // get class or alpha
+            values[line_number] = detail::convert_to<real_type, invalid_file_format_exception>(line.substr(0, pos));
+        } else {
+            values[0] = std::numeric_limits<real_type>::max();
+            pos = 0;
+        }
+
+        // get data
+        std::vector<real_type> vline(max_size);
+        while (true) {
+            std::string_view::size_type next_pos = line.find_first_of(':', pos);
+            // no further data points
+            if (next_pos == std::string_view::npos) {
+                break;
+            }
+
+            // get index
+            const auto index = detail::convert_to<unsigned long, invalid_file_format_exception>(line.substr(pos, next_pos - pos));
+            if (index >= vline.size()) {
+                vline.resize(index + 1);
+            }
+            pos = next_pos + 1;
+
+            // get value
+            next_pos = line.find_first_of(' ', pos);
+            vline[index] = detail::convert_to<real_type, invalid_file_format_exception>(line.substr(pos, next_pos - pos));
+            pos = next_pos;
+        }
+        max_size = std::max(max_size, vline.size());
+        data[line_number] = std::move(vline);
+    } catch (const std::exception &) {
+        // catch first exception and store it
+        #pragma omp critical
+        {
+            if (!parallel_exception) {
+                parallel_exception = std::current_exception();
+            }
+        }
+    }
+}
+
+template <typename real_type>
+void parse_libsvm_content(const file_reader &f, const int start, const int lower_bound, const int upper_bound, std::vector<std::vector<real_type>> &data, std::vector<real_type> &values) {
     std::size_t max_size = 0;
     std::exception_ptr parallel_exception;
 
@@ -85,57 +135,18 @@ void parse_libsvm_content(const file_reader &f, const std::size_t start, const s
     {
         #pragma omp for reduction(max \
                           : max_size)
-        for (typename std::vector<std::vector<real_type>>::size_type i = lower_bound; i < upper_bound; ++i) {
+        for (int i = lower_bound; i < upper_bound; ++i) {
             #pragma omp cancellation point for
-            try {
-                std::string_view line = f.line(i + start);
-
-                // check if class labels are present (not necessarily the case for test files)
-                std::string_view::size_type pos = line.find_first_of(" \n");
-                std::string_view::size_type first_colon = line.find_first_of(":\n");
-                if (first_colon >= pos) {
-                    // get class or alpha
-                    values[i] = detail::convert_to<real_type, invalid_file_format_exception>(line.substr(0, pos));
-                } else {
-                    values[0] = std::numeric_limits<real_type>::max();
-                    pos = 0;
-                }
-
-                // get data
-                std::vector<real_type> vline(max_size);
-                while (true) {
-                    std::string_view::size_type next_pos = line.find_first_of(':', pos);
-                    // no further data points
-                    if (next_pos == std::string_view::npos) {
-                        break;
-                    }
-
-                    // get index
-                    const auto index = detail::convert_to<unsigned long, invalid_file_format_exception>(line.substr(pos, next_pos - pos));
-                    if (index >= vline.size()) {
-                        vline.resize(index + 1);
-                    }
-                    pos = next_pos + 1;
-
-                    // get value
-                    next_pos = line.find_first_of(' ', pos);
-                    vline[index] = detail::convert_to<real_type, invalid_file_format_exception>(line.substr(pos, next_pos - pos));
-                    pos = next_pos;
-                }
-                max_size = std::max(max_size, vline.size());
-                data[i] = std::move(vline);
-            } catch (const std::exception &) {
-                // catch first exception and store it
-                #pragma omp critical
-                {
-                    if (!parallel_exception) {
-                        parallel_exception = std::current_exception();
-                    }
-                }
+            parse_libsvm_line(f, start, data, values, i, max_size, parallel_exception);
+            if (parallel_exception) {
                 // cancel parallel execution, needs env variable OMP_CANCELLATION=true
                 #pragma omp cancel for
             }
         }
+    }
+
+    if (data[data.size() - 1].size() == 0) {
+        parse_libsvm_line(f, start, data, values, data.size() - 1, max_size, parallel_exception);
     }
 
     // rethrow if an exception occurred inside the parallel region
@@ -175,8 +186,10 @@ void parameter<T>::parse_libsvm_file(const std::string &filename, std::shared_pt
 
     detail::file_reader f{ filename, '#' };
 
+    int num_data_points = f.num_lines();
+
     std::vector<std::vector<real_type>> data(f.num_lines());
-    std::vector<real_type> value(f.num_lines());
+    std::vector<real_type> value(f.num_lines(), -1);
 
     int init, rank, world_size;
     MPI_Initialized(&init);
@@ -187,25 +200,41 @@ void parameter<T>::parse_libsvm_file(const std::string &filename, std::shared_pt
     }
 
     if (init == 0) {
-        detail::parse_libsvm_content(f, 0, 0, data.size() ,data, value);
+        detail::parse_libsvm_content(f, 0, 0, data.size(),data, value);
     } else if (init == 1) {
         std::vector<std::vector<std::vector<int>>> bounds;
         compute_bounds(f.num_lines(), world_size, bounds);
-        if (rank == 0) {
-            detail::parse_libsvm_content(f, 0, 0, data.size(), data, value);
-        } else {
-            for (int i = 0; i < bounds.size(); i++) {
-                if (i % world_size == rank) {
-                    if (bounds[i][0][2] < bounds[i][0][1] && bounds[i][0][0] < data.size()) {
-                        detail::parse_libsvm_content(f, 0, bounds[i][0][0], std::min(bounds[i][0][1], int(data.size())), data, value);
-                    }
-                    if (bounds[i][0][2] < bounds[i][0][3] && bounds[i][0][2] < data.size()) {
-                        detail::parse_libsvm_content(f, 0, bounds[i][0][2], std::min(bounds[i][0][3], int(data.size())), data, value);
-                    }
+
+        for (int i = 0; i < int(bounds.size()); i++) {
+            if (i % world_size == rank) {
+                if (bounds[i][0][2] < bounds[i][0][1] && bounds[i][0][0] < num_data_points) {
+                    detail::parse_libsvm_content(f, 0, bounds[i][0][0], std::min(bounds[i][0][1], num_data_points), data, value);
+                }
+                if (bounds[i][0][2] < bounds[i][0][3] && bounds[i][0][2] < num_data_points) {
+                    detail::parse_libsvm_content(f, 0, bounds[i][0][2], std::min(bounds[i][0][3], num_data_points), data, value);
                 }
             }
         }
+
         bounds_ptr = std::make_shared<const std::vector<std::vector<std::vector<int>>>>(std::move(bounds));
+
+        MPI_Datatype mpi_real_type;
+        MPI_Type_match_size(MPI_TYPECLASS_REAL, sizeof(real_type), &mpi_real_type);
+
+        std::vector<real_type> temp(value.size(), -1);
+
+        for (int t = 0; t < world_size; t++) {
+            if (t == rank) {
+                MPI_Bcast(&value[0], value.size(), mpi_real_type, t, MPI_COMM_WORLD);
+            } else {
+                MPI_Bcast(&temp[0], value.size(), mpi_real_type, t, MPI_COMM_WORLD);
+            }
+            for (int i = 0; i < num_data_points; i++) {
+                if (value[i] == -1 && temp[i] != -1) {
+                    value[i] = temp[i];
+                }
+            }
+        }
     }
 
     // update gamma

@@ -43,7 +43,8 @@ csvm<T>::csvm(const parameter<T> &params) :
     target_{ params.target }, kernel_{ params.kernel }, degree_{ params.degree }, gamma_{ params.gamma }, coef0_{ params.coef0 }, cost_{ params.cost }, epsilon_{ params.epsilon }, print_info_{ params.print_info }, data_ptr_{ params.data_ptr }, value_ptr_{ params.value_ptr }, alpha_ptr_{ params.alpha_ptr }
     , bounds_ptr_{ params.bounds_ptr }, bias_{ -params.rho } {
 
-    int init, rank;
+    int init = -1;
+    int rank = -1;
     MPI_Initialized(&init);
     
     if (init == 1) {
@@ -55,8 +56,6 @@ csvm<T>::csvm(const parameter<T> &params) :
             throw exception{ "No data points provided!" };
         } else if (data_ptr_->empty()) {
             throw exception{ "Data set is empty!" };
-        } else if (data_ptr_->front().empty()) {
-            throw exception{ "No features provided for the data points!" };
         } else if (alpha_ptr_ != nullptr && alpha_ptr_->size() != data_ptr_->size()) {
             throw exception{ fmt::format("Number of weights ({}) must match the number of data points ({})!", alpha_ptr_->size(), data_ptr_->size()) };
         }
@@ -81,9 +80,6 @@ void csvm<T>::write_model(const std::string &model_name) {
     }
     PLSSVM_ASSERT(data_ptr_->size() == alpha_ptr_->size(), "Sizes mismatch!: {} != {}", data_ptr_->size(), alpha_ptr_->size());  // exception in constructor
     PLSSVM_ASSERT(!data_ptr_->empty(), "Data set is empty!");                                                                    // exception in constructor
-    PLSSVM_ASSERT(std::all_of(data_ptr_->begin(), data_ptr_->end(), [&](const std::vector<real_type> &point) { return point.size() == data_ptr_->front().size(); }),
-                  "All points in the data vector must have the same number of features!");    // exception in constructor
-    PLSSVM_ASSERT(!data_ptr_->front().empty(), "No features provided for the data points!");  // exception in constructor
 
     unsigned long long nBSV{ 0 };
     unsigned long long count_pos{ 0 };
@@ -156,6 +152,15 @@ void csvm<T>::write_model(const std::string &model_name) {
         return line;
     };
 
+    int rank, world_size;
+
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    MPI_Datatype mpi_real_type;
+    MPI_Type_match_size(MPI_TYPECLASS_REAL, sizeof(real_type), &mpi_real_type);
+
+
     volatile int count = 0;
     #pragma omp parallel
     {
@@ -164,15 +169,42 @@ void csvm<T>::write_model(const std::string &model_name) {
         #pragma omp for nowait
         for (typename std::vector<real_type>::size_type i = 0; i < alpha_ptr_->size(); ++i) {
             if ((*value_ptr_)[i] > 0) {
-                out_pos += format_libsvm_line((*alpha_ptr_)[i], (*data_ptr_)[i]);
+                int send_status = 0;
+                std::vector<real_type> temp_data_i(num_features_, 0);
+                int w = 0;
+                for (; w < world_size; w++) {
+                    if (rank == w && (*data_ptr_)[i].size() != 0) {
+                        send_status = 1;
+                        if (rank != 0) {
+                            MPI_Send(&(*data_ptr_)[i][0], int(num_features_), mpi_real_type, 0, 0, MPI_COMM_WORLD);
+                        }
+                    }
+                    MPI_Bcast(&send_status, 1, MPI_INT, w, MPI_COMM_WORLD);
+                    if (send_status > 0) {
+                        if (rank == 0 && w != 0) {
+                            MPI_Status status;
+                            MPI_Recv(&temp_data_i[0], int(num_features_), mpi_real_type, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
+                        }
+                        break;
+                    }
+                }
+                if (rank == 0) {
+                    if (w == 0) {
+                        out_pos += format_libsvm_line((*alpha_ptr_)[i], (*data_ptr_)[i]);
+                    } else {
+                        out_pos += format_libsvm_line((*alpha_ptr_)[i], temp_data_i);
+                    }
+                }
             }
         }
 
-        #pragma omp critical
-        {
-            model.write(out_pos.data(), static_cast<std::streamsize>(out_pos.size()));
-            count++;
-            #pragma omp flush(count, model)
+        if (rank == 0) {
+            #pragma omp critical
+            {
+                model.write(out_pos.data(), static_cast<std::streamsize>(out_pos.size()));
+                count++;
+                #pragma omp flush(count, model)
+            }
         }
 
         // all support vectors with class -1
@@ -180,20 +212,47 @@ void csvm<T>::write_model(const std::string &model_name) {
         #pragma omp for nowait
         for (typename std::vector<real_type>::size_type i = 0; i < alpha_ptr_->size(); ++i) {
             if ((*value_ptr_)[i] < 0) {
-                out_neg += format_libsvm_line((*alpha_ptr_)[i], (*data_ptr_)[i]);
+                int send_status = 0;
+                std::vector<real_type> temp_data_i(num_features_, 0);
+                int w = 0;
+                for (; w < world_size; w++) {
+                    if (rank == w && (*data_ptr_)[i].size() != 0) {
+                        send_status = 1;
+                        if (rank != 0) {
+                            MPI_Send(&(*data_ptr_)[i][0], int(num_features_), mpi_real_type, 0, 0, MPI_COMM_WORLD);
+                        }
+                    }
+                    MPI_Bcast(&send_status, 1, MPI_INT, w, MPI_COMM_WORLD);
+                    if (send_status > 0) {
+                        if (rank == 0 && w != 0) {
+                            MPI_Status status;
+                            MPI_Recv(&temp_data_i[0], int(num_features_), mpi_real_type, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
+                        }
+                        break;
+                    }
+                }
+                if (rank == 0) {
+                    if (w == 0) {
+                        out_neg += format_libsvm_line((*alpha_ptr_)[i], (*data_ptr_)[i]);
+                    } else {
+                        out_neg += format_libsvm_line((*alpha_ptr_)[i], temp_data_i);
+                    }
+                }
             }
         }
 
-        // wait for all threads to write support vectors for class 1
-#ifdef _OPENMP
-        while (count < omp_get_num_threads()) {
-        }
-#else
-        #pragma omp barrier
-#endif
+        if (rank == 0) {
+            // wait for all threads to write support vectors for class 1
+            #ifdef _OPENMP
+                while (count < omp_get_num_threads()) {
+                }
+            #else
+                #pragma omp barrier
+            #endif
 
-        #pragma omp critical
-        model.write(out_neg.data(), static_cast<std::streamsize>(out_neg.size()));
+            #pragma omp critical
+            model.write(out_neg.data(), static_cast<std::streamsize>(out_neg.size()));
+        }
     }
 
     auto end_time = std::chrono::steady_clock::now();
@@ -221,68 +280,63 @@ void csvm<T>::learn() {
     std::vector<real_type> q(num_data_points_ - 1, 0);
     std::vector<real_type> b(num_data_points_ - 1, 0);
 
-    if (rank == 0) {
-        b = *value_ptr_;
+    b = *value_ptr_;
 
-        PLSSVM_ASSERT(data_ptr_ != nullptr, "No data is provided!");  // exception in constructor
+    PLSSVM_ASSERT(data_ptr_ != nullptr, "No data is provided!");  // exception in constructor
 
-        if (value_ptr_ == nullptr) {
-            throw exception{ "No labels given for training! Maybe the data is only usable for prediction?" };
-        } else if (data_ptr_->size() != value_ptr_->size()) {
-            throw exception{ fmt::format("Number of labels ({}) must match the number of data points ({})!", value_ptr_->size(), data_ptr_->size()) };
-        }
+    if (value_ptr_ == nullptr) {
+        throw exception{ "No labels given for training! Maybe the data is only usable for prediction?" };
+    } else if (data_ptr_->size() != value_ptr_->size()) {
+        throw exception{ fmt::format("Number of labels ({}) must match the number of data points ({})!", value_ptr_->size(), data_ptr_->size()) };
+    }
 
-        PLSSVM_ASSERT(!data_ptr_->empty(), "Data set is empty!");  // exception in constructor
-        PLSSVM_ASSERT(std::all_of(data_ptr_->begin(), data_ptr_->end(), [&](const std::vector<real_type> &point) { return point.size() == data_ptr_->front().size(); }),
-                      "All points in the data vector must have the same number of features!");    // exception in constructor
-        PLSSVM_ASSERT(!data_ptr_->front().empty(), "No features provided for the data points!");  // exception in constructor
+    PLSSVM_ASSERT(!data_ptr_->empty(), "Data set is empty!");  // exception in constructor
 
-        // setup the data on the device
-        setup_data_on_device();
+    // setup the data on the device
+    setup_data_on_device();
 
-        auto start_time = std::chrono::steady_clock::now();
+    auto start_time = std::chrono::steady_clock::now();
 
+    {
+        // generate q
         {
-            // generate q
-            {
-                q = generate_q();
-            }
-            // generate right-hand side from equation
-            {
-                b.pop_back();
-                b -= value_ptr_->back();
-            }
-            // generate bottom right from A
-            {
-                QA_cost_ = kernel_function(data_ptr_->back(), data_ptr_->back()) + 1 / cost_;
-            }
-        }
+            q = generate_q();
 
-        auto end_time = std::chrono::steady_clock::now();
-        if (print_info_) {
-            fmt::print("Setup for solving the optimization problem done in {}.\n", std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time));
+            distribute_vector(q, 0);
+        }
+        // generate right-hand side from equation
+        {
+            b.pop_back();
+            b -= value_ptr_->back();
+        }
+        // generate bottom right from A
+        {
+            QA_cost_ = kernel_function(data_ptr_->back(), data_ptr_->back()) + 1 / cost_;
         }
     }
 
-    MPI_Bcast(&q[0], q.size(), mpi_real_type, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&b[0], b.size(), mpi_real_type, 0, MPI_COMM_WORLD);
+    auto end_time = std::chrono::steady_clock::now();
+    if (print_info_) {
+        fmt::print("Setup for solving the optimization problem done in {}.\n", std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time));
+    }
+
+    MPI_Bcast(&q[0], int(q.size()), mpi_real_type, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&b[0], int(b.size()), mpi_real_type, 0, MPI_COMM_WORLD);
     MPI_Bcast(&QA_cost_, 1, mpi_real_type, 0, MPI_COMM_WORLD);
 
-    auto start_time = std::chrono::steady_clock::now();
+    start_time = std::chrono::steady_clock::now();
     
     // solve minimization
     std::vector<real_type> alpha;
     alpha = solver_CG(b, num_features_, epsilon_, q);
 
-    if (rank == 0) {
-        bias_ = value_ptr_->back() + QA_cost_ * sum(alpha) - (transposed{ q } * alpha);
-        alpha.emplace_back(-sum(alpha));
+    bias_ = value_ptr_->back() + QA_cost_ * sum(alpha) - (transposed{ q } * alpha);
+    alpha.emplace_back(-sum(alpha));
 
-        alpha_ptr_ = std::make_shared<const std::vector<real_type>>(std::move(alpha));
-        w_.clear();
-    }
+    alpha_ptr_ = std::make_shared<const std::vector<real_type>>(std::move(alpha));
+    w_.clear();
 
-    auto end_time = std::chrono::steady_clock::now();
+    end_time = std::chrono::steady_clock::now();
     if (print_info_) {
         fmt::print("Solved minimization problem (r = b - Ax) using CG in {}.\n", std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time));
     }

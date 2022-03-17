@@ -192,6 +192,12 @@ class csvm {
      */
     [[nodiscard]] virtual std::vector<real_type> generate_q() = 0;
     /**
+     * @brief Distribute the vectors to the threads that need them.
+     * @param[in] ret the vector to be distributed
+     * @param[in] default_value the default value of the items in the vector
+     */
+    virtual void distribute_vector(std::vector<real_type> &ret, const real_type default_value) = 0;
+    /**
      * @brief Solves the equation \f$Ax = b\f$ using the Conjugated Gradients algorithm.
      * @details Solves using a slightly modified version of the CG algorithm described by [Jonathan Richard Shewchuk](https://www.cs.cmu.edu/~quake-papers/painless-conjugate-gradient.pdf):
      * \image html cg.png

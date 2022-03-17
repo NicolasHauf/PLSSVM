@@ -14,7 +14,6 @@
 #include <iostream>   // std::cerr, std::endl
 
 #include <mpi.h>
-#include <iostream>
 
 // perform calculations in single precision if requested
 #ifdef PLSSVM_EXECUTABLES_USE_SINGLE_PRECISION
@@ -27,9 +26,6 @@ int main(int argc, char *argv[]) {
     try {
 
         MPI_Init(&argc, &argv);
-
-        int rank;
-        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
        
         // parse SVM parameter from command line
         plssvm::parameter_train<real_type> params{ argc, argv };
@@ -40,10 +36,8 @@ int main(int argc, char *argv[]) {
         // learn
         svm->learn();
 
-        if (rank == 0) {
-            // save model file
-            svm->write_model(params.model_filename);
-        }
+        // save model file
+        svm->write_model(params.model_filename);    
 
         MPI_Finalize();
 
