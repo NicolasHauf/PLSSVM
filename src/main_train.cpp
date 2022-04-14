@@ -1,6 +1,7 @@
 /**
  * @author Alexander Van Craen
  * @author Marcel Breyer
+ * @author Nicolas Hauf
  * @copyright 2018-today The PLSSVM project - All Rights Reserved
  * @license This file is part of the PLSSVM project which is released under the MIT license.
  *          See the LICENSE.md file in the project root for full license information.
@@ -13,7 +14,7 @@
 #include <exception>  // std::exception
 #include <iostream>   // std::cerr, std::endl
 
-#include <mpi.h>
+#include <mpi.h> // parallelization using mpi
 
 // perform calculations in single precision if requested
 #ifdef PLSSVM_EXECUTABLES_USE_SINGLE_PRECISION
@@ -24,7 +25,7 @@ using real_type = double;
 
 int main(int argc, char *argv[]) {
     try {
-
+        // initialize the open mpi environment
         MPI_Init(&argc, &argv);
        
         // parse SVM parameter from command line
@@ -37,8 +38,9 @@ int main(int argc, char *argv[]) {
         svm->learn();
 
         // save model file
-        svm->write_model(params.model_filename);    
+        svm->write_model(params.model_filename);   
 
+        // finalize the Open MPI environment
         MPI_Finalize();
 
     } catch (const plssvm::exception &e) {

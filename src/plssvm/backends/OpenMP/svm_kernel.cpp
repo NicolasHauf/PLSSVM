@@ -1,6 +1,7 @@
 /**
  * @author Alexander Van Craen
  * @author Marcel Breyer
+ * @author Nicolas Hauf
  * @copyright 2018-today The PLSSVM project - All Rights Reserved
  * @license This file is part of the PLSSVM project which is released under the MIT license.
  *          See the LICENSE.md file in the project root for full license information.
@@ -16,7 +17,7 @@
 
 #include <iostream>
 
-#include <mpi.h>
+#include <mpi.h> // parallelization using mpi
 
 namespace plssvm::openmp {
 
@@ -41,6 +42,7 @@ void device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret,
     int comparrisonCount = 0;
 
     //double startTime = MPI_Wtime();
+    // each thread computes its box, defined by the bounds vector, as well as small rest bits if the computation can't be devided optimally
     for (int bounds_set = 1; bounds_set < int(bounds[rank].size()); bounds_set++) {
         std::vector<int> current_bounds = bounds[rank][bounds_set];
         #pragma omp parallel for collapse(2) schedule(dynamic)
@@ -73,6 +75,7 @@ void device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret,
 
     //double compTime = MPI_Wtime();
 
+    // sending all the results to the root thread, since the entire vector is needed for the next computations in (open mp/gpu)_csvm
     if (rank != 0) {
         MPI_Send(&ret[0], ret.size(), mpi_real_type, 0, 1, MPI_COMM_WORLD);
     } else {

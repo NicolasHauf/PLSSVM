@@ -2,6 +2,7 @@
  * @file
  * @author Alexander Van Craen
  * @author Marcel Breyer
+ * @author Nicolas Hauf
  * @copyright 2018-today The PLSSVM project - All Rights Reserved
  * @license This file is part of the PLSSVM project which is released under the MIT license.
  *          See the LICENSE.md file in the project root for full license information.
@@ -206,7 +207,7 @@ class parameter {
     std::shared_ptr<const std::vector<real_type>> alpha_ptr{};
     /// The test data to predict.
     std::shared_ptr<const std::vector<std::vector<real_type>>> test_data_ptr{};
-    /// The upper and lower bounds regarding data multiplication for each thread
+    /// The vector specifying the workload of each thread
     std::shared_ptr<const std::vector<std::vector<std::vector<int>>>> bounds_ptr{};
 
     /// The rho value of the calculated/read model.

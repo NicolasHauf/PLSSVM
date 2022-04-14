@@ -1,6 +1,7 @@
 /**
  * @author Alexander Van Craen
  * @author Marcel Breyer
+ * @author Nicolas Hauf
  * @copyright 2018-today The PLSSVM project - All Rights Reserved
  * @license This file is part of the PLSSVM project which is released under the MIT license.
  *          See the LICENSE.md file in the project root for full license information.
@@ -145,6 +146,7 @@ void parse_libsvm_content(const file_reader &f, const int start, const int lower
         }
     }
 
+    // each thread needs the last line to compute the necessary q vector
     if (data[data.size() - 1].size() == 0) {
         parse_libsvm_line(f, start, data, values, data.size() - 1, max_size, parallel_exception);
     }
@@ -230,7 +232,7 @@ void parameter<T>::parse_libsvm_file(const std::string &filename, std::shared_pt
                 MPI_Bcast(&temp[0], value.size(), mpi_real_type, t, MPI_COMM_WORLD);
             }
             for (int i = 0; i < num_data_points; i++) {
-                if (value[i] == -1 && temp[i] != -1) {
+                if (value[i] == -1) {
                     value[i] = temp[i];
                 }
             }

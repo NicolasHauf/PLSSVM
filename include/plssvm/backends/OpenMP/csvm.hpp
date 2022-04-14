@@ -2,6 +2,7 @@
  * @file
  * @author Alexander Van Craen
  * @author Marcel Breyer
+ * @author Nicolas Hauf
  * @copyright 2018-today The PLSSVM project - All Rights Reserved
  * @license This file is part of the PLSSVM project which is released under the MIT license.
  *          See the LICENSE.md file in the project root for full license information.
@@ -98,6 +99,7 @@ class csvm : public ::plssvm::csvm<T> {
      * @param[in] d the right-hand side of the equation
      * @param[in] data the data
      * @param[in] add denotes whether the values are added or subtracted from the result vector
+     * @param[in] bounds specifies the workload of each thread
      */
     void run_device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret, const std::vector<real_type> &d, const std::vector<std::vector<real_type>> &data, real_type add, const std::vector<std::vector<std::vector<int>>> &bounds);
 };

@@ -1,6 +1,7 @@
 /**
  * @author Alexander Van Craen
  * @author Marcel Breyer
+ * @author Nicolas Hauf
  * @copyright 2018-today The PLSSVM project - All Rights Reserved
  * @license This file is part of the PLSSVM project which is released under the MIT license.
  *          See the LICENSE.md file in the project root for full license information.
@@ -25,7 +26,7 @@
 #include <algorithm>  // std::fill, std::all_of
 #include <vector>     // std::vector
 
-#include <mpi.h>
+#include <mpi.h> // parallelization using mpi
 #include <iostream>
 
 namespace plssvm::openmp {
@@ -107,6 +108,9 @@ template <typename T>
 auto csvm<T>::solver_CG(const std::vector<real_type> &b, const std::size_t imax, const real_type eps, const std::vector<real_type> &q) -> std::vector<real_type> {
     using namespace plssvm::operators;
 
+    // setting up the necessary data for open mpi usage
+    // if (rank == 0) -> only root thread computes
+    // MPI_Bcast -> sending necessary data to all threads
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
