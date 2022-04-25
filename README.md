@@ -15,6 +15,7 @@ The currently available backends are:
 
 General dependencies:
   - a C++17 capable compiler (e.g. [`gcc`](https://gcc.gnu.org/) or [`clang`](https://clang.llvm.org/))
+  - Open MPI 4.0 or newer
   - [CMake](https://cmake.org/) 3.18 or newer
   - [cxxopts](https://github.com/jarro2783/cxxopts), [fast_float](https://github.com/fastfloat/fast_float) and [{fmt}](https://github.com/fmtlib/fmt) (all three are automatically build during the CMake configuration if they couldn't be found using the respective `find_package` call)
   - [GoogleTest](https://github.com/google/googletest) if testing is enabled (automatically build during the CMake configuration if `find_package(GTest)` wasn't successful)
@@ -205,10 +206,10 @@ An example invocation generating a data set consisting of blobs with 1000 data p
 ### Training
 
 ```bash
-> ./svm-train --help
-LS-SVM with multiple (GPU-)backends
+> mpirun svm-train --help
+PLS-SVM with multiple (GPU-)backends
 Usage:
-  ./svm-train [OPTION...] training_set_file [model_file]
+  mpirun -n [number of processes] svm-train [OPTION...] training_set_file [model_file]
 
   -t, --kernel_type arg         set type of kernel function.
                                          0 -- linear: u'*v
@@ -231,13 +232,13 @@ Usage:
 An example invocation using the CUDA backend could look like:
 
 ```bash
-> ./svm-train --backend cuda --input /path/to/data_file
+> mpirun svm-train --backend cuda --input /path/to/data_file
 ```
 
 Another example targeting NVIDIA GPUs using the SYCL backend looks like:
 
 ```bash
-> ./svm-train --backend sycl --target_platform gpu_nvidia --input /path/to/data_file
+> mpirun svm-train --backend sycl --target_platform gpu_nvidia --input /path/to/data_file
 ```
 
 The `--target_platform=automatic` flags works for the different backends as follows:
@@ -251,7 +252,7 @@ The `--target_platform=automatic` flags works for the different backends as foll
 
 ```bash
 > ./svm-predict --help
-LS-SVM with multiple (GPU-)backends
+PLS-SVM with multiple (GPU-)backends
 Usage:
   ./svm-predict [OPTION...] test_file model_file [output_file]
 
@@ -288,9 +289,13 @@ A simple C++ program (`main.cpp`) using this library could look like:
 #include <exception>
 #include <iostream>
 #include <vector>
+#include <mpi.h>
 
-int main(i) {
+int main(int argc, char *argv[]) {
     try {
+		// initialize the open mpi environment
+		MPI_Init(&argc, &argv);
+
         // parse SVM parameter from command line
         plssvm::parameter<double> params;
         params.backend = plssvm::backend_type::cuda;
@@ -312,6 +317,9 @@ int main(i) {
 
         // write model file to disk
         svm->write_model("model_file.libsvm");
+
+		// finalize the Open MPI environment
+		MPI_Finalize();
     } catch (const plssvm::exception &e) {
         std::cerr << e.what_with_loc() << std::endl;
     } catch (const std::exception &e) {

@@ -1,6 +1,7 @@
 /**
  * @author Alexander Van Craen
  * @author Marcel Breyer
+ * @author Nicolas Hauf
  * @copyright 2018-today The PLSSVM project - All Rights Reserved
  * @license This file is part of the PLSSVM project which is released under the MIT license.
  *          See the LICENSE.md file in the project root for full license information.
@@ -25,8 +26,8 @@
 #include <algorithm>  // std::fill, std::all_of
 #include <vector>     // std::vector
 
-#include <mpi.h>
-#include <iostream>
+#include <mpi.h> // parallelization using mpi
+#include <iostream> // std::cout, std::flush
 
 namespace plssvm::openmp {
 
@@ -43,6 +44,7 @@ csvm<T>::csvm(const parameter<T> &params) :
     }
     if (print_info_) {
         fmt::print("Using OpenMP as backend.\n\n");
+        std::cout << std::flush;
     }
 }
 
@@ -64,16 +66,41 @@ auto csvm<T>::generate_q() -> std::vector<real_type> {
 }
 
 template <typename T>
-void csvm<T>::run_device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret, const std::vector<real_type> &d, const std::vector<std::vector<real_type>> &data, const real_type add) {
+void csvm<T>::distribute_vector(std::vector<real_type> &ret, const real_type default_value) {
+    int rank, world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+    MPI_Datatype mpi_real_type;
+    MPI_Type_match_size(MPI_TYPECLASS_REAL, sizeof(real_type), &mpi_real_type);
+
+    std::vector<real_type> temp(num_data_points_ - 1, default_value);
+    
+    for (int t = 0; t < world_size; t++) {
+        if (t == rank) {
+            MPI_Bcast(&ret[0], ret.size(), mpi_real_type, t, MPI_COMM_WORLD);
+        } else {
+            MPI_Bcast(&temp[0], ret.size(), mpi_real_type, t, MPI_COMM_WORLD);
+        }
+        for (int i = 0; i < int(ret.size()); i++) {
+            if (ret[i] == default_value && temp[i] != default_value) {
+                ret[i] = temp[i];
+            }
+        }
+    }
+}
+
+template <typename T>
+void csvm<T>::run_device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret, const std::vector<real_type> &d, const std::vector<std::vector<real_type>> &data, const real_type add, const std::vector<std::vector<std::vector<int>>> &bounds) {
     switch (kernel_) {
         case kernel_type::linear:
-            openmp::device_kernel_linear(q, ret, d, data, QA_cost_, 1 / cost_, add);
+            openmp::device_kernel_linear(q, ret, d, data, QA_cost_, 1 / cost_, add, bounds);
             break;
         case kernel_type::polynomial:
-            openmp::device_kernel_poly(q, ret, d, data, QA_cost_, 1 / cost_, add, degree_, gamma_, coef0_);
+            openmp::device_kernel_poly(q, ret, d, data, QA_cost_, 1 / cost_, add, bounds, degree_, gamma_, coef0_);
             break;
         case kernel_type::rbf:
-            openmp::device_kernel_radial(q, ret, d, data, QA_cost_, 1 / cost_, add, gamma_);
+            openmp::device_kernel_radial(q, ret, d, data, QA_cost_, 1 / cost_, add, bounds, gamma_);
             break;
     }
 }
@@ -82,6 +109,9 @@ template <typename T>
 auto csvm<T>::solver_CG(const std::vector<real_type> &b, const std::size_t imax, const real_type eps, const std::vector<real_type> &q) -> std::vector<real_type> {
     using namespace plssvm::operators;
 
+    // setting up the necessary data for open mpi usage
+    // if (rank == 0) -> only root thread computes
+    // MPI_Bcast -> sending necessary data to all threads
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -96,8 +126,10 @@ auto csvm<T>::solver_CG(const std::vector<real_type> &b, const std::size_t imax,
 
     std::vector<real_type> r(b);
 
+    const std::vector<std::vector<std::vector<int>>> bounds = *bounds_ptr_;
+
     // solve: r = b - (A * alpha_)
-    run_device_kernel(q, r, alpha, *data_ptr_, -1);
+    run_device_kernel(q, r, alpha, *data_ptr_, -1, bounds);
 
     // delta = r.T * r
     real_type delta = transposed{ r } * r;
@@ -118,7 +150,7 @@ auto csvm<T>::solver_CG(const std::vector<real_type> &b, const std::size_t imax,
 
         MPI_Bcast(&d[0], d.size(), mpi_real_type, 0, MPI_COMM_WORLD);
 
-        run_device_kernel(q, Ad, d, *data_ptr_, 1);
+        run_device_kernel(q, Ad, d, *data_ptr_, 1, bounds);
 
         if (rank == 0) {
             // (alpha = delta_new / (d^T * q))
@@ -133,10 +165,10 @@ auto csvm<T>::solver_CG(const std::vector<real_type> &b, const std::size_t imax,
             // r -= A * x
         }
 
-        MPI_Bcast(&r[0], r.size(), mpi_real_type, 0, MPI_COMM_WORLD);
-        MPI_Bcast(&alpha[0], alpha.size(), mpi_real_type, 0, MPI_COMM_WORLD);
+        MPI_Bcast(&r[0], dept, mpi_real_type, 0, MPI_COMM_WORLD);
+        MPI_Bcast(&alpha[0], dept, mpi_real_type, 0, MPI_COMM_WORLD);
 
-        run_device_kernel(q, r, alpha, *data_ptr_, -1);
+        run_device_kernel(q, r, alpha, *data_ptr_, -1, bounds);
 
         // (delta = r^T * r)
         const real_type delta_old = delta;
@@ -160,9 +192,10 @@ auto csvm<T>::solver_CG(const std::vector<real_type> &b, const std::size_t imax,
     }
     if (print_info_) {
         fmt::print("Finished after {} iterations with a residuum of {} (target: {}).\n", run + 1, delta, eps * eps * delta0);
+        std::cout << std::flush;
     }
 
-    MPI_Bcast(&alpha[0], alpha.size(), mpi_real_type, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&alpha[0], dept, mpi_real_type, 0, MPI_COMM_WORLD);
 
     return alpha;
 }

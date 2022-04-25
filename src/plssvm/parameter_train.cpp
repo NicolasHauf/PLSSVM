@@ -1,6 +1,7 @@
 /**
  * @author Alexander Van Craen
  * @author Marcel Breyer
+ * @author Nicolas Hauf
  * @copyright 2018-today The PLSSVM project - All Rights Reserved
  * @license This file is part of the PLSSVM project which is released under the MIT license.
  *          See the LICENSE.md file in the project root for full license information.
@@ -21,7 +22,7 @@
 #include <string>     // std::string
 #include <utility>    // std::move
 
-#include <mpi.h>
+#include <mpi.h> // parallelization using mpi
 
 namespace plssvm {
 
@@ -35,6 +36,9 @@ parameter_train<T>::parameter_train(std::string p_input_filename) {
 
 template <typename T>
 parameter_train<T>::parameter_train(int argc, char **argv) {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
     cxxopts::Options options(argv[0], "LS-SVM with multiple (GPU-)backends");
     options
         .positional_help("training_set_file [model_file]")
@@ -56,6 +60,7 @@ parameter_train<T>::parameter_train(int argc, char **argv) {
             ("h,help", "print this helper message", cxxopts::value<bool>())
             ("input", "", cxxopts::value<decltype(input_filename)>(), "training_set_file")
             ("model", "", cxxopts::value<decltype(model_filename)>(), "model_file");
+
     // clang-format on
 
     // parse command line options
@@ -64,13 +69,17 @@ parameter_train<T>::parameter_train(int argc, char **argv) {
         options.parse_positional({ "input", "model" });
         result = options.parse(argc, argv);
     } catch (const std::exception &e) {
-        fmt::print("{}\n{}\n", e.what(), options.help());
+        if (rank == 0) {
+            fmt::print("{}\n{}\n", e.what(), options.help());
+        }
         std::exit(EXIT_FAILURE);
     }
 
     // print help message and exit
     if (result.count("help")) {
-        fmt::print("{}", options.help());
+        if (rank == 0) {
+            fmt::print("{}", options.help());
+        }
         std::exit(EXIT_SUCCESS);
     }
 
@@ -84,8 +93,10 @@ parameter_train<T>::parameter_train(int argc, char **argv) {
     if (result.count("gamma")) {
         gamma = result["gamma"].as<decltype(gamma)>();
         if (gamma == decltype(gamma){ 0.0 }) {
-            fmt::print(stderr, "gamma = 0.0 is not allowed, it doesnt make any sense!\n");
-            fmt::print("{}", options.help());
+            if (rank == 0) {
+                fmt::print(stderr, "gamma = 0.0 is not allowed, it doesnt make any sense!\n");
+                fmt::print("{}", options.help());
+            }
             std::exit(EXIT_FAILURE);
         }
     } else {
@@ -110,15 +121,15 @@ parameter_train<T>::parameter_train(int argc, char **argv) {
     // parse print info
     print_info = !print_info;
 
-    int rank, world_size;
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    // only root thread prints info
     print_info = print_info && (rank == 0);
 
     // parse input data filename
     if (!result.count("input")) {
-        fmt::print(stderr, "Error missing input file!");
-        fmt::print("{}", options.help());
+        if (rank == 0) {
+            fmt::print(stderr, "Error missing input file!");
+            fmt::print("{}", options.help());
+        }
         std::exit(EXIT_FAILURE);
     }
     input_filename = result["input"].as<decltype(input_filename)>();
@@ -130,85 +141,7 @@ parameter_train<T>::parameter_train(int argc, char **argv) {
         model_filename = base_type::model_name_from_input();
     }
 
-    int n = 0;
-
-    if (rank == 0) {
-        base_type::parse_train_file(input_filename);
-        n = data_ptr->size() - 1;
-    }
-
-    MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-    int t = world_size;
-    int wh = t / 2;
-
-    for (int i = 0; i < world_size; ++i) {
-        int lBI1 = 0;
-        int uBI1 = 0;
-        int lBJ1 = 0;
-        int uBJ1 = 0;
-
-        int lBI2 = 0;
-        int uBI2 = 0;
-        int lBJ2 = 0;
-        int uBJ2 = 0;
-
-        int min1 = 0;
-        int max1 = 0;
-        int min2 = 0;
-        int max2 = 0;
-
-
-        if (i < wh) {
-            lBI1 = n * (i) / (wh * 2);
-            uBI1 = n * (i + 1) / (wh * 2);
-            lBJ1 = 0;
-            uBJ1 = n / 2;
-
-            if (t % 2 == 1) {
-                wh++;
-            }
-            lBI2 = n * (t - i - 1) / (wh * 2);
-            uBI2 = n * (t - i) / (wh * 2);
-
-            lBJ2 = n / 2;
-            uBJ2 = n;
-
-            min1 = 0;
-            max1 = uBI1;
-            min2 = n / 2;
-            max2 = uBI2;
-
-        } else {
-            if (t % 2 == 1) {
-                wh++;
-            }
-            lBI1 = n * (i) / (wh * 2);
-            uBI1 = n * (i + 1) / (wh * 2);
-            lBJ1 = 0;
-            uBJ1 = n / 2;
-            
-            min1 = 0;
-            max1 = n / 2;
-            min2 = lBI1;
-            max2 = uBI1;
-        }
-        
-        bounds.push_back(std::vector<int>{
-            lBI1, uBI1, lBJ1, uBJ1, lBI2, uBI2, lBJ2, uBJ2, min1, max1, min2, max2
-        });     
-    }
-        
-    /*
-    if (rank == 0) {
-        for (int i = 0; i < bounds.size(); i++) {
-            for (int j = 0; j < bounds[0].size(); j++) {
-                std::cout << bounds[i][j] << ",  ";
-            }
-            std::cout << std::endl;
-        }
-    }
-    */
+    base_type::parse_train_file(input_filename);
 }
 
 // explicitly instantiate template class

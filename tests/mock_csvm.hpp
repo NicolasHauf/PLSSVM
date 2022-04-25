@@ -38,6 +38,7 @@ class mock_csvm : public plssvm::csvm<T> {
     // mock pure virtual functions
     MOCK_METHOD(void, setup_data_on_device, (), (override));
     MOCK_METHOD(std::vector<real_type>, generate_q, (), (override));
+    MOCK_METHOD(void, distribute_vector, (std::vector<real_type> &, const real_type), (override));
     MOCK_METHOD(std::vector<real_type>, solver_CG, (const std::vector<real_type> &, const std::size_t, const real_type, const std::vector<real_type> &), (override));
     MOCK_METHOD(void, update_w, (), (override));
     MOCK_METHOD(std::vector<real_type>, predict, (const std::vector<std::vector<real_type>> &), (override));

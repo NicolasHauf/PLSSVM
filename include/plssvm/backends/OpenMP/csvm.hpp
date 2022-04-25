@@ -2,6 +2,7 @@
  * @file
  * @author Alexander Van Craen
  * @author Marcel Breyer
+ * @author Nicolas Hauf
  * @copyright 2018-today The PLSSVM project - All Rights Reserved
  * @license This file is part of the PLSSVM project which is released under the MIT license.
  *          See the LICENSE.md file in the project root for full license information.
@@ -47,6 +48,7 @@ class csvm : public ::plssvm::csvm<T> {
     using base_type::QA_cost_;
     using base_type::target_;
     using base_type::w_;
+    using base_type::bounds_ptr_;
 
   public:
     /// The type of the data. Must be either `float` or `double`.
@@ -78,6 +80,10 @@ class csvm : public ::plssvm::csvm<T> {
      */
     [[nodiscard]] std::vector<real_type> generate_q() override;
     /**
+     * @copydoc plssvm::csvm::distribute_vector
+     */
+    void distribute_vector(std::vector<real_type> &ret, const real_type default_value) override;
+    /**
      * @copydoc plssvm::csvm::solver_CG
      */
     std::vector<real_type> solver_CG(const std::vector<real_type> &b, std::size_t imax, real_type eps, const std::vector<real_type> &q) override;
@@ -93,8 +99,9 @@ class csvm : public ::plssvm::csvm<T> {
      * @param[in] d the right-hand side of the equation
      * @param[in] data the data
      * @param[in] add denotes whether the values are added or subtracted from the result vector
+     * @param[in] bounds specifies the workload of each thread
      */
-    void run_device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret, const std::vector<real_type> &d, const std::vector<std::vector<real_type>> &data, real_type add);
+    void run_device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret, const std::vector<real_type> &d, const std::vector<std::vector<real_type>> &data, real_type add, const std::vector<std::vector<std::vector<int>>> &bounds);
 };
 
 extern template class csvm<float>;

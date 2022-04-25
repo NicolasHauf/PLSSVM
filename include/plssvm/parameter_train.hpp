@@ -2,6 +2,7 @@
  * @file
  * @author Alexander Van Craen
  * @author Marcel Breyer
+ * @author Nicolas Hauf
  * @copyright 2018-today The PLSSVM project - All Rights Reserved
  * @license This file is part of the PLSSVM project which is released under the MIT license.
  *          See the LICENSE.md file in the project root for full license information.
@@ -45,7 +46,7 @@ class parameter_train : public parameter<T> {
     using base_type::data_ptr;
     using base_type::test_data_ptr;
     using base_type::value_ptr;
-    using base_type::bounds;
+    using base_type::bounds_ptr;
 
     using base_type::rho;
 

@@ -2,6 +2,7 @@
  * @file
  * @author Alexander Van Craen
  * @author Marcel Breyer
+ * @author Nicolas Hauf
  * @copyright 2018-today The PLSSVM project - All Rights Reserved
  * @license This file is part of the PLSSVM project which is released under the MIT license.
  *          See the LICENSE.md file in the project root for full license information.
@@ -192,6 +193,12 @@ class csvm {
      */
     [[nodiscard]] virtual std::vector<real_type> generate_q() = 0;
     /**
+     * @brief Distribute the vectors to the threads that need them.
+     * @param[in] ret the vector to be distributed
+     * @param[in] default_value the default value of the items in the vector
+     */
+    virtual void distribute_vector(std::vector<real_type> &ret, const real_type default_value) = 0;
+    /**
      * @brief Solves the equation \f$Ax = b\f$ using the Conjugated Gradients algorithm.
      * @details Solves using a slightly modified version of the CG algorithm described by [Jonathan Richard Shewchuk](https://www.cs.cmu.edu/~quake-papers/painless-conjugate-gradient.pdf):
      * \image html cg.png
@@ -261,8 +268,8 @@ class csvm {
     std::shared_ptr<const std::vector<real_type>> value_ptr_{};
     /// The result of the CG calculation: the weights of the support vectors.
     std::shared_ptr<const std::vector<real_type>> alpha_ptr_{};
-    /// tbd
-    std::vector<std::vector<int>> bounds_;
+    /// The vector specifying the workload of each thread
+    std::shared_ptr<const std::vector<std::vector<std::vector<int>>>> bounds_ptr_{};
 
     //*************************************************************************************************************************************//
     //                                                         internal variables                                                          //
