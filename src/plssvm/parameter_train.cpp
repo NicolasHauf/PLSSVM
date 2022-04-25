@@ -22,7 +22,7 @@
 #include <string>     // std::string
 #include <utility>    // std::move
 
-#include <mpi.h>
+#include <mpi.h> // parallelization using mpi
 
 namespace plssvm {
 
@@ -36,6 +36,9 @@ parameter_train<T>::parameter_train(std::string p_input_filename) {
 
 template <typename T>
 parameter_train<T>::parameter_train(int argc, char **argv) {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
     cxxopts::Options options(argv[0], "LS-SVM with multiple (GPU-)backends");
     options
         .positional_help("training_set_file [model_file]")
@@ -57,6 +60,7 @@ parameter_train<T>::parameter_train(int argc, char **argv) {
             ("h,help", "print this helper message", cxxopts::value<bool>())
             ("input", "", cxxopts::value<decltype(input_filename)>(), "training_set_file")
             ("model", "", cxxopts::value<decltype(model_filename)>(), "model_file");
+
     // clang-format on
 
     // parse command line options
@@ -65,13 +69,17 @@ parameter_train<T>::parameter_train(int argc, char **argv) {
         options.parse_positional({ "input", "model" });
         result = options.parse(argc, argv);
     } catch (const std::exception &e) {
-        fmt::print("{}\n{}\n", e.what(), options.help());
+        if (rank == 0) {
+            fmt::print("{}\n{}\n", e.what(), options.help());
+        }
         std::exit(EXIT_FAILURE);
     }
 
     // print help message and exit
     if (result.count("help")) {
-        fmt::print("{}", options.help());
+        if (rank == 0) {
+            fmt::print("{}", options.help());
+        }
         std::exit(EXIT_SUCCESS);
     }
 
@@ -85,8 +93,10 @@ parameter_train<T>::parameter_train(int argc, char **argv) {
     if (result.count("gamma")) {
         gamma = result["gamma"].as<decltype(gamma)>();
         if (gamma == decltype(gamma){ 0.0 }) {
-            fmt::print(stderr, "gamma = 0.0 is not allowed, it doesnt make any sense!\n");
-            fmt::print("{}", options.help());
+            if (rank == 0) {
+                fmt::print(stderr, "gamma = 0.0 is not allowed, it doesnt make any sense!\n");
+                fmt::print("{}", options.help());
+            }
             std::exit(EXIT_FAILURE);
         }
     } else {
@@ -111,15 +121,15 @@ parameter_train<T>::parameter_train(int argc, char **argv) {
     // parse print info
     print_info = !print_info;
 
-    int rank, world_size;
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    // only root thread prints info
     print_info = print_info && (rank == 0);
 
     // parse input data filename
     if (!result.count("input")) {
-        fmt::print(stderr, "Error missing input file!");
-        fmt::print("{}", options.help());
+        if (rank == 0) {
+            fmt::print(stderr, "Error missing input file!");
+            fmt::print("{}", options.help());
+        }
         std::exit(EXIT_FAILURE);
     }
     input_filename = result["input"].as<decltype(input_filename)>();

@@ -35,7 +35,6 @@
 #include <vector>     // std::vector
 
 #include <mpi.h>      // parallelization using mpi
-#include <iostream>
 
 namespace plssvm {
 
@@ -163,11 +162,9 @@ void csvm<T>::write_model(const std::string &model_name) {
 
 
     volatile int count = 0;
-    //#pragma omp parallel
     {
         // all support vectors with class 1
         std::string out_pos;
-        //#pragma omp for nowait
         for (typename std::vector<real_type>::size_type i = 0; i < alpha_ptr_->size(); ++i) {
             if ((*value_ptr_)[i] > 0) {
                 int send_status = 0;
@@ -176,10 +173,12 @@ void csvm<T>::write_model(const std::string &model_name) {
                 for (; w < world_size; w++) {
                     if (rank == w && (*data_ptr_)[i].size() != 0) {
                         send_status = 1;
+                        // if root thread doesn't have the necessary data it is provided by the next thread that does (Send and Receive)
                         if (rank != 0) {
                             MPI_Send(&(*data_ptr_)[i][0], int(num_features_), mpi_real_type, 0, 0, MPI_COMM_WORLD);
                         }
                     }
+                    // send_status signals if the necessary data is found
                     MPI_Bcast(&send_status, 1, MPI_INT, w, MPI_COMM_WORLD);
                     if (send_status > 0) {
                         if (rank == 0 && w != 0) {
@@ -200,17 +199,14 @@ void csvm<T>::write_model(const std::string &model_name) {
         }
 
         if (rank == 0) {
-            //#pragma omp critical
             {
                 model.write(out_pos.data(), static_cast<std::streamsize>(out_pos.size()));
                 count++;
-                //#pragma omp flush(count, model)
             }
         }
 
         // all support vectors with class -1
         std::string out_neg;
-        //#pragma omp for nowait
         for (typename std::vector<real_type>::size_type i = 0; i < alpha_ptr_->size(); ++i) {
             if ((*value_ptr_)[i] < 0) {
                 int send_status = 0;
@@ -224,7 +220,7 @@ void csvm<T>::write_model(const std::string &model_name) {
                             MPI_Send(&(*data_ptr_)[i][0], int(num_features_), mpi_real_type, 0, 0, MPI_COMM_WORLD);
                         }
                     }
-                    // send_status signals the necessary data is found
+                    // send_status signals if the necessary data is found
                     MPI_Bcast(&send_status, 1, MPI_INT, w, MPI_COMM_WORLD);
                     if (send_status > 0) {
                         if (rank == 0 && w != 0) {
@@ -245,16 +241,6 @@ void csvm<T>::write_model(const std::string &model_name) {
         }
 
         if (rank == 0) {
-            /*
-            // wait for all threads to write support vectors for class 1
-            #ifdef _OPENMP
-                while (count < omp_get_num_threads()) {
-                }
-            #else
-                #pragma omp barrier
-            #endif
-
-            #pragma omp critical*/
             model.write(out_neg.data(), static_cast<std::streamsize>(out_neg.size()));
         }
     }

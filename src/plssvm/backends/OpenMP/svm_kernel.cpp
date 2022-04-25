@@ -15,8 +15,6 @@
 #include <utility>  // std::forward
 #include <vector>   // std::vector
 
-#include <iostream>
-
 #include <mpi.h> // parallelization using mpi
 
 namespace plssvm::openmp {
@@ -39,9 +37,6 @@ void device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret,
         std::fill(ret.begin(), ret.end(), real_type{ 0.0 });
     }
 
-    int comparrisonCount = 0;
-
-    //double startTime = MPI_Wtime();
     // each thread computes its box, defined by the bounds vector, as well as small rest bits if the computation can't be devided optimally
     for (int bounds_set = 1; bounds_set < int(bounds[rank].size()); bounds_set++) {
         std::vector<int> current_bounds = bounds[rank][bounds_set];
@@ -53,14 +48,12 @@ void device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret,
                     if (ii + i < dept) {
                         for (kernel_index_type jj = 0; jj < OPENMP_BLOCK_SIZE && jj + j < std::min(ii + i + 1, current_bounds[3]); ++jj) {
                             if (i + ii >= j + jj && j + jj < dept) {
-#                               pragma omp atomic
-                                comparrisonCount++;
                                 const real_type temp = (kernel_function<kernel>(data[ii + i], data[jj + j], std::forward<Args>(args)...) + QA_cost - q[ii + i] - q[jj + j]) * add;
                                 if (ii + i == jj + j) {
                                     ret_iii += (temp + cost * add) * d[ii + i];
                                 } else {
                                     ret_iii += temp * d[jj + j];
-#                                   pragma omp atomic
+                                    #pragma omp atomic
                                     ret[jj + j] += temp * d[ii + i];
                                 }
                             }
@@ -72,8 +65,6 @@ void device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret,
             }
         }
     }
-
-    //double compTime = MPI_Wtime();
 
     // sending all the results to the root thread, since the entire vector is needed for the next computations in (open mp/gpu)_csvm
     if (rank != 0) {
@@ -88,16 +79,6 @@ void device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret,
             }
         }
     }
-
-    //double sendTime = MPI_Wtime();
-  
-    for (int i = 0; i < world_size; i++) {
-        if (i == rank) {
-            //std::cout << rank << " ; " << compTime - startTime << " ; " << sendTime - compTime << " ; " << sendTime - startTime << " ; " << comparrisonCount << std::endl;
-        }
-        MPI_Barrier(MPI_COMM_WORLD);
-    }
-    
 }
 
 }  // namespace detail

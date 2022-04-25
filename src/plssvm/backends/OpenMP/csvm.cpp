@@ -27,7 +27,7 @@
 #include <vector>     // std::vector
 
 #include <mpi.h> // parallelization using mpi
-#include <iostream>
+#include <iostream> // std::cout, std::flush
 
 namespace plssvm::openmp {
 
@@ -44,6 +44,7 @@ csvm<T>::csvm(const parameter<T> &params) :
     }
     if (print_info_) {
         fmt::print("Using OpenMP as backend.\n\n");
+        std::cout << std::flush;
     }
 }
 
@@ -191,6 +192,7 @@ auto csvm<T>::solver_CG(const std::vector<real_type> &b, const std::size_t imax,
     }
     if (print_info_) {
         fmt::print("Finished after {} iterations with a residuum of {} (target: {}).\n", run + 1, delta, eps * eps * delta0);
+        std::cout << std::flush;
     }
 
     MPI_Bcast(&alpha[0], dept, mpi_real_type, 0, MPI_COMM_WORLD);

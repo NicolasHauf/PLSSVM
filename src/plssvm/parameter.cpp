@@ -34,42 +34,45 @@
 #include <utility>      // std::move, std::pair
 #include <vector>       // std::vector
 
-#include <iostream>
-#include <mpi.h>
+#include <mpi.h> // parallelization using mpi
 
 namespace plssvm {
 
 void compute_bounds(int n, int world_size, std::vector<std::vector<std::vector<int>>> &ret) {
-    int u = floor(sqrt(2 * world_size + 0.25) - 0.5) + 1;
-    int box_size = ceil(n / static_cast<float>(u));
+    // h(height) is the amount of boxes in the first box column
+    int h = floor(sqrt(2 * world_size + 0.25) - 0.5) + 1;
+    int box_size = ceil(n / static_cast<float>(h));
 
-    int cur_thread = 0;
+    int current_thread = 0;
 
-    for (int j = 0; j < u - 1; j++) {
-        for (int i = j + 1; i < u; i++) {
+    // box i in x direction
+    // box j in y direction
+    for (int j = 0; j < h - 1; j++) {
+        for (int i = j + 1; i < h; i++) {
             ret.push_back(std::vector<std::vector<int>>{
                 { box_size * i, box_size * (i + 1), box_size * j, box_size * (j + 1) },
                 { box_size * i, box_size * (i + 1), box_size * j, box_size * (j + 1) } });
-            cur_thread++;
+            current_thread++;
         }
     }
 
-    for (int ij = 0; ij < u; ij += 2) {
-        if (cur_thread > world_size - 1) {
-            ret[cur_thread % world_size].push_back(std::vector<int>{ box_size * ij, box_size * (ij + 1), box_size * ij, box_size * (ij + 1) });
-            ret[cur_thread % world_size].push_back(std::vector<int>{ box_size * (ij + 1), box_size * (ij + 2), box_size * (ij + 1), box_size * (ij + 2) });
+    // box ij on the diagonal
+    for (int ij = 0; ij < h; ij += 1) {
+        if (current_thread > world_size - 1) {
+            ret[current_thread % world_size].push_back(std::vector<int>{ box_size * ij, box_size * (ij + 1), box_size * ij, box_size * (ij + 1) });
             ret.push_back(std::vector<std::vector<int>>{
-                { box_size * ij, box_size * (ij + 2), 0, 0 } });
+                { box_size * ij, box_size * (ij + 1), 0, 0 } });
         } else {
             ret.push_back(std::vector<std::vector<int>>{
                 { box_size * ij, box_size * (ij + 2), 0, 0 },
                 { box_size * ij, box_size * (ij + 1), box_size * ij, box_size * (ij + 1) },
                 { box_size * (ij + 1), box_size * (ij + 2), box_size * (ij + 1), box_size * (ij + 2) } });
+            ij += 1;
         }
-        cur_thread++;
+        current_thread++;
     }
 
-    for (; cur_thread < world_size; cur_thread++) {
+    for (; current_thread < world_size; current_thread++) {
         ret.push_back(std::vector<std::vector<int>>{
             { 0, 0, 0, 0 } });
     }
@@ -267,65 +270,12 @@ void parameter<T>::parse_libsvm_file(const std::string &filename, std::shared_pt
     }
 }
 
-// read and parse an ARFF file
-template <typename T>
-void parameter<T>::parse_arff_file(const std::string &filename, std::shared_ptr<const std::vector<std::vector<real_type>>> &data_ptr_ref) {
-    auto start_time = std::chrono::steady_clock::now();
+namespace detail {
 
-    // set new filenames
-    if (model_filename == model_name_from_input() || model_filename.empty()) {
-        input_filename = filename;
-        model_filename = model_name_from_input();
-    }
-    input_filename = filename;
-
-    detail::file_reader f{ filename, '%' };
-    std::size_t max_size = 0;
-    bool has_label{ false };
-
-    // parse arff header
-    std::size_t header = 0;
-    {
-        for (; header < f.num_lines(); ++header) {
-            std::string line{ f.line(header) };
-            detail::to_upper_case(line);
-            if (detail::starts_with(line, "@RELATION")) {
-                // ignore relation
-                continue;
-            } else if (detail::starts_with(line, "@ATTRIBUTE")) {
-                if (line.find("NUMERIC") == std::string::npos) {
-                    throw invalid_file_format_exception{ fmt::format("Can only use NUMERIC features, but '{}' was given!", f.line(header)) };
-                }
-                if (has_label) {
-                    throw invalid_file_format_exception{ "Only the last ATTRIBUTE may be CLASS!" };
-                } else if (line.find("CLASS") != std::string::npos) {
-                    has_label = true;
-                }
-                // add a feature
-                ++max_size;
-            } else if (detail::starts_with(line, "@DATA")) {
-                // finished reading header -> start parsing data
-                break;
-            }
-        }
-    }
-
-    // perform other checks
-    if (max_size == 0) {
-        // no @ATTRIBUTE fields
-        throw invalid_file_format_exception{ "Can't parse file: no ATTRIBUTES are defined!" };
-    } else if (header + 1 >= f.num_lines()) {
-        // no data points provided
-        throw invalid_file_format_exception{ "Can't parse file: no data points are given or @DATA is missing!" };
-    }
-
-    std::vector<std::vector<real_type>> data(f.num_lines() - (header + 1));
-    std::vector<real_type> value(f.num_lines() - (header + 1));
-
-    const std::size_t num_features = has_label ? max_size - 1 : max_size;
-
+template <typename real_type>
+void parse_arff_content(const file_reader &f, std::size_t max_size, const bool has_label, const std::size_t header, const int lower_bound, const int upper_bound, std::vector<std::vector<real_type>> &data, std::vector<real_type> &value, const std::size_t num_features) {
     #pragma omp parallel for
-    for (typename std::vector<std::vector<real_type>>::size_type i = 0; i < data.size(); ++i) {
+    for (int i = lower_bound; i < upper_bound; ++i) {
         data[i].resize(num_features);
     }
 
@@ -334,7 +284,7 @@ void parameter<T>::parse_arff_file(const std::string &filename, std::shared_ptr<
     #pragma omp parallel
     {
         #pragma omp for
-        for (typename std::vector<std::vector<real_type>>::size_type i = 0; i < data.size(); ++i) {
+        for (int i = lower_bound; i < upper_bound; ++i) {
             #pragma omp cancellation point for
             try {
                 std::string_view line = f.line(i + header + 1);
@@ -413,15 +363,15 @@ void parameter<T>::parse_arff_file(const std::string &filename, std::shared_ptr<
                     }
                 }
             } catch (const std::exception &) {
-                // catch first exception and store it
-                #pragma omp critical
+            // catch first exception and store it
+            #pragma omp critical
                 {
                     if (!parallel_exception) {
                         parallel_exception = std::current_exception();
                     }
                 }
-                // cancel parallel execution, needs env variable OMP_CANCELLATION=true
-                #pragma omp cancel for
+            // cancel parallel execution, needs env variable OMP_CANCELLATION=true
+            #pragma omp cancel for
             }
         }
     }
@@ -429,6 +379,117 @@ void parameter<T>::parse_arff_file(const std::string &filename, std::shared_ptr<
     // rethrow if an exception occurred inside the parallel region
     if (parallel_exception) {
         std::rethrow_exception(parallel_exception);
+    }
+}
+
+}  // namespace detail
+
+// read and parse an ARFF file
+template <typename T>
+void parameter<T>::parse_arff_file(const std::string &filename, std::shared_ptr<const std::vector<std::vector<real_type>>> &data_ptr_ref) {
+    auto start_time = std::chrono::steady_clock::now();
+
+    // set new filenames
+    if (model_filename == model_name_from_input() || model_filename.empty()) {
+        input_filename = filename;
+        model_filename = model_name_from_input();
+    }
+    input_filename = filename;
+
+    detail::file_reader f{ filename, '%' };
+    std::size_t max_size = 0;
+    bool has_label{ false };
+
+    // parse arff header
+    std::size_t header = 0;
+    {
+        for (; header < f.num_lines(); ++header) {
+            std::string line{ f.line(header) };
+            detail::to_upper_case(line);
+            if (detail::starts_with(line, "@RELATION")) {
+                // ignore relation
+                continue;
+            } else if (detail::starts_with(line, "@ATTRIBUTE")) {
+                if (line.find("NUMERIC") == std::string::npos) {
+                    throw invalid_file_format_exception{ fmt::format("Can only use NUMERIC features, but '{}' was given!", f.line(header)) };
+                }
+                if (has_label) {
+                    throw invalid_file_format_exception{ "Only the last ATTRIBUTE may be CLASS!" };
+                } else if (line.find("CLASS") != std::string::npos) {
+                    has_label = true;
+                }
+                // add a feature
+                ++max_size;
+            } else if (detail::starts_with(line, "@DATA")) {
+                // finished reading header -> start parsing data
+                break;
+            }
+        }
+    }
+
+    // perform other checks
+    if (max_size == 0) {
+        // no @ATTRIBUTE fields
+        throw invalid_file_format_exception{ "Can't parse file: no ATTRIBUTES are defined!" };
+    } else if (header + 1 >= f.num_lines()) {
+        // no data points provided
+        throw invalid_file_format_exception{ "Can't parse file: no data points are given or @DATA is missing!" };
+    }
+
+    int num_data_points = f.num_lines() - (header + 1);
+
+    std::vector<std::vector<real_type>> data(f.num_lines() - (header + 1));
+    std::vector<real_type> value(f.num_lines() - (header + 1), -1);
+
+    const std::size_t num_features = has_label ? max_size - 1 : max_size;
+
+    int init, rank, world_size;
+    MPI_Initialized(&init);
+
+    if (init == 1) {
+        MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    }
+
+    if (init == 0) {
+        detail::parse_arff_content(f, max_size, has_label, header, 0, data.size(), data, value, num_features);
+    } else if (init == 1) {
+        std::vector<std::vector<std::vector<int>>> bounds;
+        compute_bounds(f.num_lines(), world_size, bounds);
+
+        for (int i = 0; i < int(bounds.size()); i++) {
+            if (i % world_size == rank) {
+                if (bounds[i][0][2] < bounds[i][0][1] && bounds[i][0][0] < num_data_points) {
+                    detail::parse_arff_content(f, max_size, has_label, header, bounds[i][0][0], std::min(bounds[i][0][1], num_data_points), data, value, num_features);
+                }
+                if (bounds[i][0][2] < bounds[i][0][3] && bounds[i][0][2] < num_data_points) {
+                    detail::parse_arff_content(f, max_size, has_label, header, bounds[i][0][2], std::min(bounds[i][0][3], num_data_points), data, value, num_features);
+                }
+            }
+        }
+
+        if (data[data.size() - 1].size() == 0) {
+            parse_arff_content(f, max_size, has_label, header, data.size() - 1, data.size(), data, value, num_features);
+        }
+
+        MPI_Datatype mpi_real_type;
+        MPI_Type_match_size(MPI_TYPECLASS_REAL, sizeof(real_type), &mpi_real_type);
+
+        std::vector<real_type> temp(value.size(), -1);
+
+        for (int t = 0; t < world_size; t++) {
+            if (t == rank) {
+                MPI_Bcast(&value[0], value.size(), mpi_real_type, t, MPI_COMM_WORLD);
+            } else {
+                MPI_Bcast(&temp[0], value.size(), mpi_real_type, t, MPI_COMM_WORLD);
+            }
+            for (int i = 0; i < num_data_points; i++) {
+                if (value[i] == -1) {
+                    value[i] = temp[i];
+                }
+            }
+        }
+        bounds_ptr = std::make_shared<const std::vector<std::vector<std::vector<int>>>>(std::move(bounds));
     }
 
     // update gamma
@@ -443,6 +504,7 @@ void parameter<T>::parse_arff_file(const std::string &filename, std::shared_ptr<
     } else {
         value_ptr = nullptr;
     }
+    
 
     auto end_time = std::chrono::steady_clock::now();
     if (print_info) {
