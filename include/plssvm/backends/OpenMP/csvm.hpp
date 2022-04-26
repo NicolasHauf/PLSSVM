@@ -80,10 +80,6 @@ class csvm : public ::plssvm::csvm<T> {
      */
     [[nodiscard]] std::vector<real_type> generate_q() override;
     /**
-     * @copydoc plssvm::csvm::distribute_vector
-     */
-    void distribute_vector(std::vector<real_type> &ret, const real_type default_value) override;
-    /**
      * @copydoc plssvm::csvm::solver_CG
      */
     std::vector<real_type> solver_CG(const std::vector<real_type> &b, std::size_t imax, real_type eps, const std::vector<real_type> &q) override;

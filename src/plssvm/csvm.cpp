@@ -292,7 +292,20 @@ void csvm<T>::learn() {
         {
             q = generate_q();
 
-            distribute_vector(q, 0);
+            std::vector<real_type> temp(num_data_points_ - 1, 0);
+
+            for (int t = 0; t < world_size; t++) {
+                if (t == rank) {
+                    MPI_Bcast(&q[0], q.size(), mpi_real_type, t, MPI_COMM_WORLD);
+                } else {
+                    MPI_Bcast(&temp[0], q.size(), mpi_real_type, t, MPI_COMM_WORLD);
+                }
+                for (int i = 0; i < int(q.size()); i++) {
+                    if (q[i] == 0 && temp[i] != 0) {
+                        q[i] = temp[i];
+                    }
+                }
+            }
         }
         // generate right-hand side from equation
         {

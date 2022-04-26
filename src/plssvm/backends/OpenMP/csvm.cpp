@@ -66,31 +66,6 @@ auto csvm<T>::generate_q() -> std::vector<real_type> {
 }
 
 template <typename T>
-void csvm<T>::distribute_vector(std::vector<real_type> &ret, const real_type default_value) {
-    int rank, world_size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-
-    MPI_Datatype mpi_real_type;
-    MPI_Type_match_size(MPI_TYPECLASS_REAL, sizeof(real_type), &mpi_real_type);
-
-    std::vector<real_type> temp(num_data_points_ - 1, default_value);
-    
-    for (int t = 0; t < world_size; t++) {
-        if (t == rank) {
-            MPI_Bcast(&ret[0], ret.size(), mpi_real_type, t, MPI_COMM_WORLD);
-        } else {
-            MPI_Bcast(&temp[0], ret.size(), mpi_real_type, t, MPI_COMM_WORLD);
-        }
-        for (int i = 0; i < int(ret.size()); i++) {
-            if (ret[i] == default_value && temp[i] != default_value) {
-                ret[i] = temp[i];
-            }
-        }
-    }
-}
-
-template <typename T>
 void csvm<T>::run_device_kernel(const std::vector<real_type> &q, std::vector<real_type> &ret, const std::vector<real_type> &d, const std::vector<std::vector<real_type>> &data, const real_type add, const std::vector<std::vector<std::vector<int>>> &bounds) {
     switch (kernel_) {
         case kernel_type::linear:
