@@ -40,7 +40,7 @@ namespace plssvm {
 
 void compute_bounds(int n, int world_size, std::vector<std::vector<std::vector<int>>> &ret) {
     // h(height) is the amount of boxes in the first box column
-    int h = floor(sqrt(2 * world_size + 0.25) - 0.5) + 1;
+    int h = floor(sqrt(2 * world_size));
     int box_size = ceil(n / static_cast<float>(h));
 
     int current_thread = 0;
