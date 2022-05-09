@@ -31,8 +31,19 @@
 #include <string>      // std::string
 #include <vector>      // std::vector
 
+#include <mpi.h> // parallelization using mpi
+
 // the floating point types to test
 using floating_point_types = ::testing::Types<float, double>;
+
+void initialize_mpi_csvm(){
+    int init;
+    MPI_Initialized(&init);
+    if (init == 0){
+        MPI_Init(NULL, NULL);
+    }
+    return;
+}
 
 template <typename T>
 class BaseCSVMTransform : public ::testing::Test {};
@@ -135,8 +146,6 @@ TYPED_TEST(BaseCSVM, constructor_exceptions) {
 
     // create C-SVM with a data set with features of different sizes
     std::vector<std::vector<real_type>> data = { { real_type{ 1 } }, { real_type{ 2 }, real_type{ 3 } } };
-    params.data_ptr = std::make_shared<const std::vector<std::vector<real_type>>>(std::move(data));
-    EXPECT_THROW_WHAT(mock_csvm{ params }, plssvm::exception, "All points in the data vector must have the same number of features!");
 
     // create C-SVM with zero sized features
     data = { {}, {} };
@@ -213,6 +222,8 @@ TYPED_TEST(BaseCSVM, kernel_function) {
 
 // check whether plssvm::csvm<T>::learn() internally calls the correct functions
 TYPED_TEST(BaseCSVM, learn) {
+    initialize_mpi_csvm();
+
     // create parameter object
     plssvm::parameter<typename TypeParam::real_type> params;
     params.print_info = false;
@@ -228,10 +239,14 @@ TYPED_TEST(BaseCSVM, learn) {
     EXPECT_CALL(csvm, solver_CG).Times(1);
 
     csvm.learn();
+
+    // MPI_Finalize();
 }
 
 // check whether plssvm::csvm<T>::learn() with wrong data correctly fails
 TYPED_TEST(BaseCSVM, learn_exceptions) {
+    initialize_mpi_csvm();
+
     // create parameter object
     plssvm::parameter<typename TypeParam::real_type> params;
     params.print_info = false;
@@ -254,6 +269,8 @@ TYPED_TEST(BaseCSVM, learn_exceptions) {
     // attempting to call learn() with different number of labels than data points should result in an exception
     csvm.get_value_ptr() = std::make_shared<const std::vector<typename TypeParam::real_type>>();
     EXPECT_THROW_WHAT(csvm.learn(), plssvm::exception, "Number of labels (0) must match the number of data points (5)!");
+
+    // MPI_Finalize();
 }
 
 // check whether plssvm::csvm<T>::accuracy() with an empty points vector returns an accuracy of 0

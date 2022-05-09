@@ -148,9 +148,18 @@ void parse_libsvm_content(const file_reader &f, const int start, const int lower
             }
         }
     }
+    // rethrow if an exception occurred inside the parallel region
+    if (parallel_exception) {
+        std::rethrow_exception(parallel_exception);
+    }
 
-    // each thread needs the last line to compute the necessary q vector
-    if (data[data.size() - 1].size() == 0) {
+    // resize sparse lines to fit the required feature length
+    for (int i = lower_bound; i < upper_bound; ++i) {
+        data[i].resize(max_size);
+    }
+
+    // each thread reads the last line which is needed to compute the necessary q vector
+    if (data.size() != 0 && data[data.size() - 1].size() == 0) {
         parse_libsvm_line(f, start, data, values, data.size() - 1, max_size, parallel_exception);
     }
 
@@ -205,7 +214,7 @@ void parameter<T>::parse_libsvm_file(const std::string &filename, std::shared_pt
     }
 
     if (init == 0) {
-        detail::parse_libsvm_content(f, 0, 0, data.size(),data, value);
+        detail::parse_libsvm_content(f, 0, 0, data.size(), data, value);
     } else if (init == 1) {
         std::vector<std::vector<std::vector<int>>> bounds;
         compute_bounds(f.num_lines(), world_size, bounds);
@@ -222,6 +231,8 @@ void parameter<T>::parse_libsvm_file(const std::string &filename, std::shared_pt
         }
 
         bounds_ptr = std::make_shared<const std::vector<std::vector<std::vector<int>>>>(std::move(bounds));
+
+        MPI_Comm_set_errhandler(MPI_COMM_WORLD, MPI_ERRORS_RETURN);
 
         MPI_Datatype mpi_real_type;
         MPI_Type_match_size(MPI_TYPECLASS_REAL, sizeof(real_type), &mpi_real_type);

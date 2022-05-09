@@ -35,6 +35,8 @@
 #include <string_view>       // std::string_view
 #include <vector>            // std::vector
 
+#include <mpi.h> // parallelization using mpi
+
 template <typename real_type, typename U>
 std::vector<real_type> initialize_with_correct_type(const std::initializer_list<U> &data_vec) {
     if constexpr (std::is_same_v<real_type, U>) {
@@ -58,12 +60,38 @@ std::vector<std::vector<real_type>> initialize_with_correct_type(const std::init
     return correct_data;
 }
 
+void initialize_mpi_parameter(){
+    int init;
+    MPI_Initialized(&init);
+    if (init == 0){
+        MPI_Init(NULL, NULL);
+    }
+    return;
+}
+
 // the floating point types to test
 using floating_point_types = ::testing::Types<float, double>;
 
 template <typename T>
-class Parameter : public ::testing::Test {};
+class Parameter : public ::testing::Test {
+    //Parameter();
+    //~Parameter();
+};
+
+/*
+Parameter::Parameter(void){
+    MPI_Init(NULL, NULL);
+    std::cout << "Object created" << std::endl;
+}
+
+Parameter::~Parameter(void){
+    MPI_Finalize();
+    std::cout << "Object deleted" << std::endl;
+}
+*/
+
 TYPED_TEST_SUITE(Parameter, floating_point_types);
+
 
 // test whether plssvm::parameter<T>::parameter() correctly default initializes all member variables
 TYPED_TEST(Parameter, default_constructor) {
@@ -641,9 +669,9 @@ TYPED_TEST(Parameter, output_operator) {
     std::string correct_output =
         fmt::format("kernel_type       linear\n"
                     "degree            3\n"
-                    "gamma             0\n"
-                    "coef0             0\n"
-                    "cost              1\n"
+                    "gamma             0.0\n"
+                    "coef0             0.0\n"
+                    "cost              1.0\n"
                     "epsilon           0.001\n"
                     "print_info        true\n"
                     "backend           openmp\n"
@@ -651,7 +679,7 @@ TYPED_TEST(Parameter, output_operator) {
                     "input_filename    ''\n"
                     "model_filename    ''\n"
                     "predict_filename  ''\n"
-                    "rho               0\n"
+                    "rho               0.0\n"
                     "real_type         {}\n",
                     plssvm::detail::arithmetic_type_name<TypeParam>());
 
@@ -698,6 +726,8 @@ TYPED_TEST(ParameterTrain, parse_filename) {
 
 // check whether the command line parsing for plssvm::parameter_train<T> is correct
 TYPED_TEST(ParameterTrain, parse_command_line_arguments) {
+    initialize_mpi_parameter();
+
     // used command line parameters
     std::vector<std::string> argv_vec = { "./svm-train", "--backend", "cuda", "--target_platform", "gpu_nvidia", "-t", "1", "-d", "5", "--gamma", "3.1415", "-r", "0.42", "--cost", "1.89", "-e", "0.00001", "-q", "--input", PLSSVM_TEST_PATH "/data/libsvm/5x4.libsvm" };
     std::vector<char *> argv(argv_vec.size());
@@ -732,6 +762,8 @@ TYPED_TEST(ParameterTrain, parse_command_line_arguments) {
     EXPECT_EQ(params.test_data_ptr, nullptr);
 
     EXPECT_EQ(params.rho, real_type{ 0 });
+
+    // MPI_Finalize();
 }
 
 //*************************************************************************************************************************************//

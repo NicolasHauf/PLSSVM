@@ -58,6 +58,8 @@ csvm<T>::csvm(const parameter<T> &params) :
             throw exception{ "Data set is empty!" };
         } else if (alpha_ptr_ != nullptr && alpha_ptr_->size() != data_ptr_->size()) {
             throw exception{ fmt::format("Number of weights ({}) must match the number of data points ({})!", alpha_ptr_->size(), data_ptr_->size()) };
+        } else if (data_ptr_->front().empty()) {
+            throw exception{ "No features provided for the data points!" };
         }
 
         num_data_points_ = data_ptr_->size();
@@ -257,21 +259,6 @@ template <typename T>
 void csvm<T>::learn() {
     using namespace plssvm::operators;
 
-    int rank, world_size;
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    MPI_Datatype mpi_real_type;
-    MPI_Type_match_size(MPI_TYPECLASS_REAL, sizeof(real_type), &mpi_real_type);
-    
-    MPI_Bcast(&num_data_points_, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&num_features_, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-    std::vector<real_type> q(num_data_points_ - 1, 0);
-    std::vector<real_type> b(num_data_points_ - 1, 0);
-
-    b = *value_ptr_;
-
     PLSSVM_ASSERT(data_ptr_ != nullptr, "No data is provided!");  // exception in constructor
 
     if (value_ptr_ == nullptr) {
@@ -282,8 +269,25 @@ void csvm<T>::learn() {
 
     PLSSVM_ASSERT(!data_ptr_->empty(), "Data set is empty!");  // exception in constructor
 
+    std::vector<real_type> q(num_data_points_ - 1, 0);
+    std::vector<real_type> b(num_data_points_ - 1, 0);
+
+    b = *value_ptr_;
+
     // setup the data on the device
     setup_data_on_device();
+
+    int rank, world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    MPI_Comm_set_errhandler(MPI_COMM_WORLD, MPI_ERRORS_RETURN);
+
+    MPI_Datatype mpi_real_type;
+    MPI_Type_match_size(MPI_TYPECLASS_REAL, 4, &mpi_real_type);
+
+    MPI_Bcast(&num_data_points_, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&num_features_, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     auto start_time = std::chrono::steady_clock::now();
 

@@ -26,6 +26,8 @@
 #include <random>  // std::random_device, std::mt19937, std::uniform_real_distribution
 #include <vector>  // std::vector
 
+#include <mpi.h> // parallelization using mpi
+
 // enumerate all floating point type and kernel combinations to test
 using parameter_types = ::testing::Types<
     util::google_test::parameter_definition<float, plssvm::kernel_type::linear>,
@@ -34,6 +36,15 @@ using parameter_types = ::testing::Types<
     util::google_test::parameter_definition<double, plssvm::kernel_type::linear>,
     util::google_test::parameter_definition<double, plssvm::kernel_type::polynomial>,
     util::google_test::parameter_definition<double, plssvm::kernel_type::rbf>>;
+
+void initialize_mpi_openmp(){
+    int init;
+    MPI_Initialized(&init);
+    if (init == 0){
+        MPI_Init(NULL, NULL);
+    }
+    return;
+}
 
 template <typename T>
 class OpenMP_CSVM : public ::testing::Test {};
@@ -68,7 +79,9 @@ TYPED_TEST(OpenMP_CSVM, constructor_invalid_target_platform) {
 
 // check whether writing the resulting model file is correct
 TYPED_TEST(OpenMP_CSVM, write_model) {
+    initialize_mpi_openmp();
     generic::write_model_test<mock_openmp_csvm, typename TypeParam::real_type, TypeParam::kernel>();
+    // MPI_Finalize();
 }
 
 // check whether the q vector is generated correctly
@@ -78,6 +91,8 @@ TYPED_TEST(OpenMP_CSVM, generate_q) {
 
 // check whether the device kernels are correct
 TYPED_TEST(OpenMP_CSVM, device_kernel) {
+    initialize_mpi_openmp();
+
     // create parameter object
     plssvm::parameter<typename TypeParam::real_type> params;
     params.print_info = false;
@@ -116,6 +131,7 @@ TYPED_TEST(OpenMP_CSVM, device_kernel) {
         std::vector<real_type> calculated(dept, 0.0);
         csvm_openmp.set_QA_cost(QA_cost);
         csvm_openmp.set_cost(cost);
+
         csvm_openmp.run_device_kernel(q_vec, calculated, x, csvm_openmp.get_device_data(), add, bounds);
 
         ASSERT_EQ(correct.size(), calculated.size()) << "add: " << add;
@@ -123,6 +139,7 @@ TYPED_TEST(OpenMP_CSVM, device_kernel) {
             util::gtest_assert_floating_point_near(correct[index], calculated[index], fmt::format("\tindex: {}, add: {}", index, add));
         }
     }
+    // MPI_Finalize();
 }
 
 // check whether the correct labels are predicted
@@ -132,5 +149,7 @@ TYPED_TEST(OpenMP_CSVM, predict) {
 
 // check whether the accuracy calculation is correct
 TYPED_TEST(OpenMP_CSVM, accuracy) {
+    initialize_mpi_openmp();
     generic::accuracy_test<mock_openmp_csvm, typename TypeParam::real_type, TypeParam::kernel>();
+    // MPI_Finalize();
 }
