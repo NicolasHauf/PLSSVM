@@ -1,0 +1,59 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+;1.97485
+Read 500000 data points with 200 features in 3092ms using the libsvm parser.
+Using OpenMP as backend.
+
+Setup for solving the optimization problem done in 696ms.
+;589.318
+Start Iteration 1 (max: 200) with current residuum 3.3396885139188475e+20 (target: 333968851.39188474).
+;601.615
+;593.802
+Start Iteration 2 (max: 200) with current residuum 3.0535730165082906e+17 (target: 333968851.39188474).
+;601.996
+;601.166
+Start Iteration 3 (max: 200) with current residuum 88821662997.0815 (target: 333968851.39188474).
+;603.086
+;599.565
+Start Iteration 4 (max: 200) with current residuum 15030010946.99815 (target: 333968851.39188474).
+;601.27
+;601.736
+Start Iteration 5 (max: 200) with current residuum 36763385834.189125 (target: 333968851.39188474).
+;600.806
+;601.042
+Start Iteration 6 (max: 200) with current residuum 7877139222.160695 (target: 333968851.39188474).
+;592.339
+;601.874
+Start Iteration 7 (max: 200) with current residuum 3416203465.707023 (target: 333968851.39188474).
+;601.577
+;601.515
+Start Iteration 8 (max: 200) with current residuum 1282334071.8843272 (target: 333968851.39188474).
+;601.73
+;596.882
+Start Iteration 9 (max: 200) with current residuum 24449340821.04332 (target: 333968851.39188474).
+;592.138
+;601.738
+Start Iteration 10 (max: 200) with current residuum 729774392.7546353 (target: 333968851.39188474).
+;599.751
+;596.379
+Start Iteration 11 (max: 200) with current residuum 1197450699.2246115 (target: 333968851.39188474).
+;602.292
+;601.23
+Finished after 11 iterations with a residuum of 111864585.16784307 (target: 333968851.39188474).
+Solved minimization problem (r = b - Ax) using CG in 13871989ms.
+
+Optimization finished
+svm_type c_svc
+kernel_type linear
+nr_class 2
+total_sv 500000
+rho 0.91718112640865
+label 1 -1
+nr_sv 250000 250000
+SV
+
+Wrote model file with 500000 support vectors in 141125ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4550                                 03:53:42                                  
+4550.0        260782816   1919096K   03:53:42          0  838661888   2644584K 

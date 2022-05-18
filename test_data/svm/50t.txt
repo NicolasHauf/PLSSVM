@@ -1,0 +1,5 @@
+srun: Warning: can't honor --ntasks-per-node set to 8 which doesn't match the requested tasks 50 with the number of requested nodes 7. Ignoring --ntasks-per-node.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask 
+------------ ---------- ---------- ---------- ---------- 
+3459                                 00:00:03            
+3459.0          9279898     16324K   00:00:03         29 

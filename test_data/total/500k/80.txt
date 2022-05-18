@@ -1,0 +1,59 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+;2.07435
+Read 500000 data points with 200 features in 3603ms using the libsvm parser.
+Using OpenMP as backend.
+
+Setup for solving the optimization problem done in 971ms.
+;528.412
+Start Iteration 1 (max: 200) with current residuum 3.339688513918849e+20 (target: 333968851.39188486).
+;534.532
+;533.847
+Start Iteration 2 (max: 200) with current residuum 3.0535730165082944e+17 (target: 333968851.39188486).
+;529.14
+;534.43
+Start Iteration 3 (max: 200) with current residuum 88821662997.08408 (target: 333968851.39188486).
+;530.409
+;533.919
+Start Iteration 4 (max: 200) with current residuum 15030011030.778372 (target: 333968851.39188486).
+;533.895
+;531.877
+Start Iteration 5 (max: 200) with current residuum 37784872764.225784 (target: 333968851.39188486).
+;533.727
+;532.965
+Start Iteration 6 (max: 200) with current residuum 7831773464.165472 (target: 333968851.39188486).
+;535.048
+;534.486
+Start Iteration 7 (max: 200) with current residuum 3416203467.1630325 (target: 333968851.39188486).
+;530.782
+;532.461
+Start Iteration 8 (max: 200) with current residuum 1282374878.938893 (target: 333968851.39188486).
+;531.855
+;531.47
+Start Iteration 9 (max: 200) with current residuum 24773659649.37262 (target: 333968851.39188486).
+;534.552
+;530.399
+Start Iteration 10 (max: 200) with current residuum 632302810.2549571 (target: 333968851.39188486).
+;534.25
+;534.418
+Start Iteration 11 (max: 200) with current residuum 1601451317.5916772 (target: 333968851.39188486).
+;534.078
+;534.418
+Finished after 11 iterations with a residuum of 111864586.50641331 (target: 333968851.39188486).
+Solved minimization problem (r = b - Ax) using CG in 12311267ms.
+
+Optimization finished
+svm_type c_svc
+kernel_type linear
+nr_class 2
+total_sv 500000
+rho 0.9176934458275241
+label 1 -1
+nr_sv 250000 250000
+SV
+
+Wrote model file with 500000 support vectors in 152561ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4544                                 03:27:56                                  
+4544.0        213586272   1882068K   03:27:55          0  823826624   3035268K 

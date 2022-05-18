@@ -1,0 +1,59 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+;2.086
+Read 500000 data points with 200 features in 2997ms using the libsvm parser.
+Using OpenMP as backend.
+
+Setup for solving the optimization problem done in 878ms.
+;559.59
+Start Iteration 1 (max: 200) with current residuum 3.3396885139188495e+20 (target: 333968851.3918849).
+;565.106
+;562.03
+Start Iteration 2 (max: 200) with current residuum 3.0535730165082995e+17 (target: 333968851.3918849).
+;560.201
+;560.154
+Start Iteration 3 (max: 200) with current residuum 88821662997.08278 (target: 333968851.3918849).
+;559.475
+;561.045
+Start Iteration 4 (max: 200) with current residuum 15030011097.758932 (target: 333968851.3918849).
+;563.765
+;556.312
+Start Iteration 5 (max: 200) with current residuum 38601494274.25866 (target: 333968851.3918849).
+;559.87
+;560.513
+Start Iteration 6 (max: 200) with current residuum 7797581898.103588 (target: 333968851.3918849).
+;560.353
+;562.375
+Start Iteration 7 (max: 200) with current residuum 3416203448.6410675 (target: 333968851.3918849).
+;559.806
+;562.705
+Start Iteration 8 (max: 200) with current residuum 1282027426.459076 (target: 333968851.3918849).
+;554.969
+;561.32
+Start Iteration 9 (max: 200) with current residuum 21838293314.035606 (target: 333968851.3918849).
+;561.249
+;561.777
+Start Iteration 10 (max: 200) with current residuum 954221363.5231528 (target: 333968851.3918849).
+;562.091
+;560.139
+Start Iteration 11 (max: 200) with current residuum 867797487.5335982 (target: 333968851.3918849).
+;559.078
+;561.995
+Finished after 11 iterations with a residuum of 111864588.24085614 (target: 333968851.3918849).
+Solved minimization problem (r = b - Ax) using CG in 12901989ms.
+
+Optimization finished
+svm_type c_svc
+kernel_type linear
+nr_class 2
+total_sv 500000
+rho 0.9162531629992259
+label 1 -1
+nr_sv 250000 250000
+SV
+
+Wrote model file with 500000 support vectors in 137126ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4549                                 03:37:30                                  
+4549.0        233209520   1741644K   03:37:30          0  826007936   2592284K 

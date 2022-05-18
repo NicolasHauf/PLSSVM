@@ -1,0 +1,6 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask 
+------------ ---------- ---------- ---------- ---------- 
+3448                                 00:00:01            
+3448.0        10165.50K     18360K   00:00:01          7 

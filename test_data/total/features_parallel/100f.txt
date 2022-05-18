@@ -1,0 +1,62 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+;0.359712
+Read 100000 data points with 100 features in 4532ms using the libsvm parser.
+Using OpenMP as backend.
+
+Setup for solving the optimization problem done in 455ms.
+;6.50476
+Start Iteration 1 (max: 100) with current residuum 9.373795374844888e+17 (target: 937379.5374844888).
+;6.24062
+;6.41468
+Start Iteration 2 (max: 100) with current residuum 941784933494422.5 (target: 937379.5374844888).
+;6.40249
+;6.36523
+Start Iteration 3 (max: 100) with current residuum 2463776559.499432 (target: 937379.5374844888).
+;6.44195
+;6.46458
+Start Iteration 4 (max: 100) with current residuum 383937396.35779774 (target: 937379.5374844888).
+;6.45865
+;6.3964
+Start Iteration 5 (max: 100) with current residuum 110957426.85852654 (target: 937379.5374844888).
+;6.4253
+;6.38806
+Start Iteration 6 (max: 100) with current residuum 30178814419.98111 (target: 937379.5374844888).
+;6.43328
+;6.4446
+Start Iteration 7 (max: 100) with current residuum 45923718.57893076 (target: 937379.5374844888).
+;6.45688
+;6.38298
+Start Iteration 8 (max: 100) with current residuum 15261685.79696689 (target: 937379.5374844888).
+;6.41565
+;6.3496
+Start Iteration 9 (max: 100) with current residuum 5395389.256437908 (target: 937379.5374844888).
+;6.44046
+;6.40622
+Start Iteration 10 (max: 100) with current residuum 15349552.845062068 (target: 937379.5374844888).
+;6.42568
+;6.42789
+Start Iteration 11 (max: 100) with current residuum 5230956.491784834 (target: 937379.5374844888).
+;6.22222
+;6.41094
+Start Iteration 12 (max: 100) with current residuum 1730734.478471348 (target: 937379.5374844888).
+;6.50017
+;6.44057
+Finished after 12 iterations with a residuum of 348444.0099769454 (target: 937379.5374844888).
+Solved minimization problem (r = b - Ax) using CG in 167577ms.
+
+Optimization finished
+svm_type c_svc
+kernel_type linear
+nr_class 2
+total_sv 100000
+rho -0.2304123539991494
+label 1 -1
+nr_sv 50000 50000
+SV
+
+Wrote model file with 100000 support vectors in 38967ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4567                                 00:03:34                                  
+4567.0         38329264    297780K   00:03:33          0  734594176   1062116K 

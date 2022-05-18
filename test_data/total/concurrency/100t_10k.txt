@@ -1,0 +1,58 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+;0.227452
+Read 10000 data points with 200 features in 1579ms using the libsvm parser.
+Using OpenMP as backend.
+
+Setup for solving the optimization problem done in 384ms.
+;0.170258
+Start Iteration 1 (max: 200) with current residuum 4006902794489164 (target: 4006.902794489164).
+;0.18324
+;0.187341
+Start Iteration 2 (max: 200) with current residuum 3665335104454.559 (target: 4006.902794489164).
+;0.227829
+;0.140285
+Start Iteration 3 (max: 200) with current residuum 2130138.3820667653 (target: 4006.902794489164).
+;0.1801
+;0.183568
+Start Iteration 4 (max: 200) with current residuum 337178.19725611445 (target: 4006.902794489164).
+;0.21562
+;0.196241
+Start Iteration 5 (max: 200) with current residuum 88895.754205559 (target: 4006.902794489164).
+;0.28514
+;0.164436
+Start Iteration 6 (max: 200) with current residuum 1459154.3580321996 (target: 4006.902794489164).
+;0.166661
+;0.251914
+Start Iteration 7 (max: 200) with current residuum 55271.87770988796 (target: 4006.902794489164).
+;0.111744
+;0.216627
+Start Iteration 8 (max: 200) with current residuum 30747.363407879588 (target: 4006.902794489164).
+;0.150201
+;0.183746
+Start Iteration 9 (max: 200) with current residuum 17161.21915494518 (target: 4006.902794489164).
+;0.190367
+;0.181168
+Start Iteration 10 (max: 200) with current residuum 119947.65029006623 (target: 4006.902794489164).
+;0.158964
+;0.202303
+Start Iteration 11 (max: 200) with current residuum 5650.172976677654 (target: 4006.902794489164).
+;0.171918
+;0.18112
+Start Iteration 12 (max: 200) with current residuum 1083621.840258908 (target: 4006.902794489164).
+;0.179931
+;0.174134
+Finished after 12 iterations with a residuum of 1776.9984390044685 (target: 4006.902794489164).
+Solved minimization problem (r = b - Ax) using CG in 8909ms.
+
+Optimization finished
+svm_type c_svc
+kernel_type linear
+nr_class 2
+total_sv 10000
+rho -0.0003374932435455946
+label 1 -1
+nr_sv 5066 4934
+SV
+
+Wrote model file with 10000 support vectors in 4712ms.

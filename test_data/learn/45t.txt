@@ -1,0 +1,6 @@
+srun: Warning: can't honor --ntasks-per-node set to 8 which doesn't match the requested tasks 45 with the number of requested nodes 6. Ignoring --ntasks-per-node.
+Solved minimization problem (r = b - Ax) using CG in 17888ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask 
+------------ ---------- ---------- ---------- ---------- 
+3464                                 00:00:21            
+3464.0         11484092     21024K   00:00:20          0 

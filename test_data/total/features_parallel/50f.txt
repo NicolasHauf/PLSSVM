@@ -1,0 +1,59 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+;0.251029
+Read 100000 data points with 50 features in 2785ms using the libsvm parser.
+Using OpenMP as backend.
+
+Setup for solving the optimization problem done in 473ms.
+;3.31631
+Start Iteration 1 (max: 50) with current residuum 1.751443172146836e+17 (target: 175144.31721468357).
+;3.26776
+;3.23964
+Start Iteration 2 (max: 50) with current residuum 384309781602171.3 (target: 175144.31721468357).
+;3.2517
+;3.34552
+Start Iteration 3 (max: 50) with current residuum 3702854959.8625717 (target: 175144.31721468357).
+;3.08386
+;3.23841
+Start Iteration 4 (max: 50) with current residuum 390329279.0164329 (target: 175144.31721468357).
+;3.35952
+;3.2013
+Start Iteration 5 (max: 50) with current residuum 106738939.36116637 (target: 175144.31721468357).
+;3.33295
+;3.27016
+Start Iteration 6 (max: 50) with current residuum 202199004.31907624 (target: 175144.31721468357).
+;3.36273
+;3.29371
+Start Iteration 7 (max: 50) with current residuum 30211800.334059924 (target: 175144.31721468357).
+;3.28775
+;3.25093
+Start Iteration 8 (max: 50) with current residuum 5567030.040358677 (target: 175144.31721468357).
+;3.26227
+;3.31895
+Start Iteration 9 (max: 50) with current residuum 1732975.6120924589 (target: 175144.31721468357).
+;3.30225
+;3.24115
+Start Iteration 10 (max: 50) with current residuum 362134.1939028361 (target: 175144.31721468357).
+;3.28673
+;3.28904
+Start Iteration 11 (max: 50) with current residuum 1075940.9837389893 (target: 175144.31721468357).
+;3.29897
+;3.3329
+Finished after 11 iterations with a residuum of 74544.23474952618 (target: 175144.31721468357).
+Solved minimization problem (r = b - Ax) using CG in 82070ms.
+
+Optimization finished
+svm_type c_svc
+kernel_type linear
+nr_class 2
+total_sv 100000
+rho -0.5588448229477028
+label 1 -1
+nr_sv 50000 50000
+SV
+
+Wrote model file with 100000 support vectors in 36194ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4566                                 00:02:03                                  
+4566.0         30861272    139084K   00:02:03          0  732327744    865492K 

@@ -1,0 +1,37 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+Read 100000 data points with 500 features in 10589ms using the libsvm parser from file '../../SVM/data/100k/500f/data_file.libsvm'.
+
+task: training
+kernel type: linear -> u'*v
+cost: 1
+epsilon: 1e-06
+input file (data set): '../../SVM/data/100k/500f/data_file.libsvm'
+output file (model): 'data_file.libsvm.model'
+
+Using OpenMP as backend.
+
+Setup for solving the optimization problem done in 61ms.
+Start Iteration 1 (max: 500) with current residuum 1.762750803458251e+19 (target: 17627508.03458251). Done in 738904ms.
+Start Iteration 2 (max: 500) with current residuum 1.982881248939084e+16 (target: 17627508.03458251). Done in 738639ms.
+Start Iteration 3 (max: 500) with current residuum 500843975.26761144 (target: 17627508.03458251). Done in 738637ms.
+Start Iteration 4 (max: 500) with current residuum 51997369.23285476 (target: 17627508.03458251). Done in 738637ms.
+Start Iteration 5 (max: 500) with current residuum 679649746.2169201 (target: 17627508.03458251). Done in 738630ms.
+Finished after 5 iterations with a residuum of 16991600.681954116 (target: 17627508.03458251) and an average iteration time of 738689ms.
+Solved minimization problem (r = b - Ax) using CG in 4062978ms.
+
+Optimization finished
+svm_type c_svc
+kernel_type linear
+nr_class 2
+total_sv 100000
+rho 2.2725553059080994
+label 1 -1
+nr_sv 50000 50000
+SV
+
+Wrote model file ('data_file.libsvm.model') with 100000 support vectors in 2758ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4578                                 01:08:03                                  
+4578.0          496260K    496260K   01:08:02          0    611688K    611688K 

@@ -1,0 +1,59 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+;3.2334
+Read 500000 data points with 200 features in 3472ms using the libsvm parser.
+Using OpenMP as backend.
+
+Setup for solving the optimization problem done in 124ms.
+;3769.28
+Start Iteration 1 (max: 200) with current residuum 3.3396885139188515e+20 (target: 333968851.39188516).
+;3768.54
+;3769.5
+Start Iteration 2 (max: 200) with current residuum 3.053573016508297e+17 (target: 333968851.39188516).
+;3768.89
+;3768.22
+Start Iteration 3 (max: 200) with current residuum 88821662997.08046 (target: 333968851.39188516).
+;3767.61
+;3768.62
+Start Iteration 4 (max: 200) with current residuum 15030011069.489632 (target: 333968851.39188516).
+;3768.77
+;3768.81
+Start Iteration 5 (max: 200) with current residuum 38256858216.29096 (target: 333968851.39188516).
+;3767.85
+;3769.47
+Start Iteration 6 (max: 200) with current residuum 7811797275.861209 (target: 333968851.39188516).
+;3768.73
+;3768.86
+Start Iteration 7 (max: 200) with current residuum 3416203462.6913795 (target: 333968851.39188516).
+;3768.77
+;3770.67
+Start Iteration 8 (max: 200) with current residuum 1282294301.789594 (target: 333968851.39188516).
+;3768.56
+;3770.45
+Start Iteration 9 (max: 200) with current residuum 24127946510.971115 (target: 333968851.39188516).
+;3769.58
+;3769
+Start Iteration 10 (max: 200) with current residuum 468277883.793706 (target: 333968851.39188516).
+;3769.38
+;3769.04
+Start Iteration 11 (max: 200) with current residuum 14420498265.173193 (target: 333968851.39188516).
+;3768.95
+;3768.75
+Finished after 11 iterations with a residuum of 111864646.92983325 (target: 333968851.39188516).
+Solved minimization problem (r = b - Ax) using CG in 86699646ms.
+
+Optimization finished
+svm_type c_svc
+kernel_type linear
+nr_class 2
+total_sv 500000
+rho 0.9235311672295552
+label 1 -1
+nr_sv 250000 250000
+SV
+
+Wrote model file with 500000 support vectors in 18464ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4556                               1-00:05:27                                  
+4556.0        685357760    842544K 1-00:05:26          1   1270208K   1290796K 

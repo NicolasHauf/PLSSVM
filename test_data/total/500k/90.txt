@@ -1,0 +1,59 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+;1.57031
+Read 500000 data points with 200 features in 3097ms using the libsvm parser.
+Using OpenMP as backend.
+
+Setup for solving the optimization problem done in 1147ms.
+;355.557
+Start Iteration 1 (max: 200) with current residuum 3.339688513918849e+20 (target: 333968851.39188486).
+;354.867
+;354.405
+Start Iteration 2 (max: 200) with current residuum 3.0535730165082944e+17 (target: 333968851.39188486).
+;355.24
+;356.334
+Start Iteration 3 (max: 200) with current residuum 88821662997.08434 (target: 333968851.39188486).
+;356.196
+;356.333
+Start Iteration 4 (max: 200) with current residuum 15030011030.79005 (target: 333968851.39188486).
+;355.608
+;353.717
+Start Iteration 5 (max: 200) with current residuum 37785014724.859505 (target: 333968851.39188486).
+;356.37
+;354.331
+Start Iteration 6 (max: 200) with current residuum 7831767365.280541 (target: 333968851.39188486).
+;355.223
+;355.409
+Start Iteration 7 (max: 200) with current residuum 3416203469.2669005 (target: 333968851.39188486).
+;356.082
+;356.151
+Start Iteration 8 (max: 200) with current residuum 1282415437.015623 (target: 333968851.39188486).
+;355.437
+;355.964
+Start Iteration 9 (max: 200) with current residuum 25091201711.13897 (target: 333968851.39188486).
+;356.225
+;355.734
+Start Iteration 10 (max: 200) with current residuum 913676034.574519 (target: 333968851.39188486).
+;350.809
+;356.233
+Start Iteration 11 (max: 200) with current residuum 899272736.3527532 (target: 333968851.39188486).
+;355.939
+;354.058
+Finished after 11 iterations with a residuum of 111864582.82494628 (target: 333968851.39188486).
+Solved minimization problem (r = b - Ax) using CG in 8220613ms.
+
+Optimization finished
+svm_type c_svc
+kernel_type linear
+nr_class 2
+total_sv 500000
+rho 0.9168523394237127
+label 1 -1
+nr_sv 250000 250000
+SV
+
+Wrote model file with 500000 support vectors in 204294ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4542                                 02:20:35                                  
+4542.0        200732352   1927188K   02:20:35          0  789851904   2621960K 

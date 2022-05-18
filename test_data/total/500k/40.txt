@@ -1,0 +1,59 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+;2.40999
+Read 500000 data points with 200 features in 3367ms using the libsvm parser.
+Using OpenMP as backend.
+
+Setup for solving the optimization problem done in 699ms.
+;833.102
+Start Iteration 1 (max: 200) with current residuum 3.3396885139188475e+20 (target: 333968851.39188474).
+;840.207
+;838.746
+Start Iteration 2 (max: 200) with current residuum 3.053573016508296e+17 (target: 333968851.39188474).
+;837.041
+;836.988
+Start Iteration 3 (max: 200) with current residuum 88821662997.08234 (target: 333968851.39188474).
+;836.487
+;835.787
+Start Iteration 4 (max: 200) with current residuum 15030011030.006596 (target: 333968851.39188474).
+;838.454
+;844.122
+Start Iteration 5 (max: 200) with current residuum 37775470976.990364 (target: 333968851.39188474).
+;835.817
+;838.638
+Start Iteration 6 (max: 200) with current residuum 7832177505.129209 (target: 333968851.39188474).
+;836.749
+;835.962
+Start Iteration 7 (max: 200) with current residuum 3416203477.8883157 (target: 333968851.39188474).
+;835.821
+;841.169
+Start Iteration 8 (max: 200) with current residuum 1282581509.2451606 (target: 333968851.39188474).
+;838.863
+;843.645
+Start Iteration 9 (max: 200) with current residuum 26338970301.912853 (target: 333968851.39188474).
+;841.747
+;839.86
+Start Iteration 10 (max: 200) with current residuum 554370540.8319358 (target: 333968851.39188474).
+;834.943
+;837.441
+Start Iteration 11 (max: 200) with current residuum 2471385500.7779026 (target: 333968851.39188474).
+;836.746
+;836.165
+Finished after 11 iterations with a residuum of 111864588.21356577 (target: 333968851.39188474).
+Solved minimization problem (r = b - Ax) using CG in 19278424ms.
+
+Optimization finished
+svm_type c_svc
+kernel_type linear
+nr_class 2
+total_sv 500000
+rho 0.9187022522561961
+label 1 -1
+nr_sv 250000 250000
+SV
+
+Wrote model file with 500000 support vectors in 109967ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4545                                 05:23:20                                  
+4545.0        282483904   1861988K   05:23:20          0    827720K   2616000K 

@@ -1,0 +1,137 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+;0.15278
+Read 10000 data points with 200 features in 776ms using the libsvm parser.
+Using OpenMP as backend.
+
+2 ; 0
+Setup for solving the optimization problem done in 66ms.
+;1.91775
+0 ; 24995000
+1 ; 25000000
+Start Iteration 1 (max: 200) with current residuum 4006902794489165.5 (target: 4006.9027944891654).
+2 ; 0
+;1.93542
+0 ; 24995000
+1 ; 25000000
+2 ; 0
+;1.92315
+0 ; 24995000
+1 ; 25000000
+Start Iteration 2 (max: 200) with current residuum 3665335104454.56 (target: 4006.9027944891654).
+2 ; 0
+1 ; 25000000
+;2.00285
+0 ; 24995000
+2 ; 0
+1 ; 25000000
+;2.02313
+0 ; 24995000
+Start Iteration 3 (max: 200) with current residuum 2130138.382066751 (target: 4006.9027944891654).
+2 ; 0
+1 ; 25000000
+;2.01223
+0 ; 24995000
+2 ; 0
+1 ; 25000000
+;2.05602
+0 ; 24995000
+Start Iteration 4 (max: 200) with current residuum 337178.19725781854 (target: 4006.9027944891654).
+2 ; 0
+;1.95954
+0 ; 24995000
+1 ; 25000000
+2 ; 0
+1 ; 25000000
+;2.04737
+0 ; 24995000
+Start Iteration 5 (max: 200) with current residuum 88906.00887788372 (target: 4006.9027944891654).
+2 ; 0
+1 ; 25000000
+;2.00407
+0 ; 24995000
+2 ; 0
+1 ; 25000000
+;2.02904
+0 ; 24995000
+Start Iteration 6 (max: 200) with current residuum 82232892.08787757 (target: 4006.9027944891654).
+2 ; 0
+1 ; 25000000
+;1.99624
+0 ; 24995000
+2 ; 0
+;1.94798
+0 ; 24995000
+1 ; 25000000
+Start Iteration 7 (max: 200) with current residuum 53285.45121270061 (target: 4006.9027944891654).
+2 ; 0
+1 ; 25000000
+;2.03451
+0 ; 24995000
+2 ; 0
+1 ; 25000000
+;2.04812
+0 ; 24995000
+Start Iteration 8 (max: 200) with current residuum 30747.28888903959 (target: 4006.9027944891654).
+2 ; 0
+1 ; 25000000
+;1.96663
+0 ; 24995000
+2 ; 0
+1 ; 25000000
+;1.97466
+0 ; 24995000
+Start Iteration 9 (max: 200) with current residuum 15991.149006772574 (target: 4006.9027944891654).
+2 ; 0
+1 ; 25000000
+;2.02153
+0 ; 24995000
+2 ; 0
+;1.95835
+0 ; 24995000
+1 ; 25000000
+Start Iteration 10 (max: 200) with current residuum 240132.41288566616 (target: 4006.9027944891654).
+2 ; 0
+1 ; 25000000
+;1.96336
+0 ; 24995000
+2 ; 0
+1 ; 25000000
+;1.99605
+0 ; 24995000
+Start Iteration 11 (max: 200) with current residuum 5785.700837377299 (target: 4006.9027944891654).
+2 ; 0
+1 ; 25000000
+;1.97793
+0 ; 24995000
+2 ; 0
+1 ; 25000000
+;1.98795
+0 ; 24995000
+Start Iteration 12 (max: 200) with current residuum 201020.61119065047 (target: 4006.9027944891654).
+2 ; 0
+1 ; 25000000
+;1.94214
+0 ; 24995000
+2 ; 0
+;1.9122
+0 ; 24995000
+1 ; 25000000
+Finished after 12 iterations with a residuum of 1776.989318331495 (target: 4006.9027944891654).
+Solved minimization problem (r = b - Ax) using CG in 50014ms.
+
+Optimization finished
+svm_type c_svc
+kernel_type linear
+nr_class 2
+total_sv 10000
+rho -0.0008633251862590896
+label 1 -1
+nr_sv 5066 4934
+SV
+
+Wrote model file with 10000 support vectors in 385ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4613                                 00:00:53                                  
+4613.0         27514198     40792K   00:00:52          0    540676K    696212K 

@@ -1,0 +1,5 @@
+Solved minimization problem (r = b - Ax) using CG in 20282ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask 
+------------ ---------- ---------- ---------- ---------- 
+3463                                 00:00:23            
+3463.0        10717.50K     21000K   00:00:22          0 

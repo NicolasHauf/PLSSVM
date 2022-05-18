@@ -1,0 +1,59 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+;0.509911
+Read 100000 data points with 250 features in 10343ms using the libsvm parser.
+Using OpenMP as backend.
+
+Setup for solving the optimization problem done in 425ms.
+;15.2133
+Start Iteration 1 (max: 250) with current residuum 4.5056273657250637e+18 (target: 4505627.365725064).
+;15.2398
+;15.2832
+Start Iteration 2 (max: 250) with current residuum 4366207584887403.5 (target: 4505627.365725064).
+;15.2225
+;15.1935
+Start Iteration 3 (max: 250) with current residuum 1090259948.2885005 (target: 4505627.365725064).
+;15.1764
+;15.2636
+Start Iteration 4 (max: 250) with current residuum 153380781.18829626 (target: 4505627.365725064).
+;15.2507
+;15.3693
+Start Iteration 5 (max: 250) with current residuum 60752339.51841533 (target: 4505627.365725064).
+;15.1631
+;15.2097
+Start Iteration 6 (max: 250) with current residuum 1353656912.1423125 (target: 4505627.365725064).
+;15.2396
+;15.2838
+Start Iteration 7 (max: 250) with current residuum 27022577.65013713 (target: 4505627.365725064).
+;15.1915
+;15.23
+Start Iteration 8 (max: 250) with current residuum 17683073.11064069 (target: 4505627.365725064).
+;15.2385
+;15.1844
+Start Iteration 9 (max: 250) with current residuum 402972405.35642296 (target: 4505627.365725064).
+;15.24
+;15.2564
+Start Iteration 10 (max: 250) with current residuum 9665446.600720203 (target: 4505627.365725064).
+;15.3309
+;15.3918
+Start Iteration 11 (max: 250) with current residuum 3053063182.4611816 (target: 4505627.365725064).
+;15.2795
+;15.1017
+Finished after 11 iterations with a residuum of 3840360.786078917 (target: 4505627.365725064).
+Solved minimization problem (r = b - Ax) using CG in 358268ms.
+
+Optimization finished
+svm_type c_svc
+kernel_type linear
+nr_class 2
+total_sv 100000
+rho -0.7668970854812187
+label 1 -1
+nr_sv 50000 50000
+SV
+
+Wrote model file with 100000 support vectors in 46013ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4568                                 00:06:58                                  
+4568.0         56401428    261884K   00:06:57          0  738459072   1024024K 

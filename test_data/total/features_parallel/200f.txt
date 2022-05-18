@@ -1,0 +1,59 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+;0.443189
+Read 100000 data points with 200 features in 8076ms using the libsvm parser.
+Using OpenMP as backend.
+
+Setup for solving the optimization problem done in 660ms.
+;12.015
+Start Iteration 1 (max: 200) with current residuum 3.0204678798935096e+18 (target: 3020467.8798935097).
+;12.3916
+;12.2254
+Start Iteration 2 (max: 200) with current residuum 3001947948098554.5 (target: 3020467.8798935097).
+;11.9187
+;12.3706
+Start Iteration 3 (max: 200) with current residuum 1018790671.0325966 (target: 3020467.8798935097).
+;12.203
+;12.3977
+Start Iteration 4 (max: 200) with current residuum 148387901.55892617 (target: 3020467.8798935097).
+;12.3992
+;12.2994
+Start Iteration 5 (max: 200) with current residuum 56376994.65704088 (target: 3020467.8798935097).
+;12.3147
+;12.2977
+Start Iteration 6 (max: 200) with current residuum 475162067.08816063 (target: 3020467.8798935097).
+;12.4173
+;12.3127
+Start Iteration 7 (max: 200) with current residuum 28266955.950623505 (target: 3020467.8798935097).
+;12.3052
+;12.2175
+Start Iteration 8 (max: 200) with current residuum 15791433.664164573 (target: 3020467.8798935097).
+;11.9614
+;12.3714
+Start Iteration 9 (max: 200) with current residuum 218493079.1730635 (target: 3020467.8798935097).
+;12.3313
+;12.3956
+Start Iteration 10 (max: 200) with current residuum 5866351.524223145 (target: 3020467.8798935097).
+;12.2959
+;12.3159
+Start Iteration 11 (max: 200) with current residuum 5170154708.277659 (target: 3020467.8798935097).
+;12.2869
+;12.3109
+Finished after 11 iterations with a residuum of 1745517.6577884222 (target: 3020467.8798935097).
+Solved minimization problem (r = b - Ax) using CG in 290183ms.
+
+Optimization finished
+svm_type c_svc
+kernel_type linear
+nr_class 2
+total_sv 100000
+rho 1.0790979108693364
+label 1 -1
+nr_sv 50191 49809
+SV
+
+Wrote model file with 100000 support vectors in 44072ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4562                                 00:05:47                                  
+4562.0         49651096    356412K   00:05:46          0  736938880   1121900K 

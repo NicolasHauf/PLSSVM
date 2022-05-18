@@ -1,0 +1,7 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+Solved minimization problem (r = b - Ax) using CG in 151783ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4502                                 00:02:34                                  
+4502.0           36060K     36060K   00:02:33          0    529124K    529124K 

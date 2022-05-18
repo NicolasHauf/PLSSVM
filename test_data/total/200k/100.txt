@@ -1,0 +1,7 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+srun: Warning: can't honor --ntasks-per-node set to 8 which doesn't match the requested tasks 100 with the number of requested nodes 13. Ignoring --ntasks-per-node.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4094                                 00:22:20                                  
+4094.0         89865544    775832K   00:22:19          0  760131264   1743184K 

@@ -1,0 +1,41 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+Read 100000 data points with 10 features in 35ms using the libsvm parser from file '../../SVM/data/100k/10f/data_file.libsvm'.
+
+task: training
+kernel type: linear -> u'*v
+cost: 1
+epsilon: 1e-06
+input file (data set): '../../SVM/data/100k/10f/data_file.libsvm'
+output file (model): 'data_file.libsvm.model'
+
+Using OpenMP as backend.
+
+Setup for solving the optimization problem done in 1ms.
+Start Iteration 1 (max: 10) with current residuum 2.1734651744775108e+16 (target: 21734.651744775107). Done in 28554ms.
+Start Iteration 2 (max: 10) with current residuum 78379413245756.4 (target: 21734.651744775107). Done in 28529ms.
+Start Iteration 3 (max: 10) with current residuum 1942374639.7911959 (target: 21734.651744775107). Done in 28539ms.
+Start Iteration 4 (max: 10) with current residuum 303207640.84140897 (target: 21734.651744775107). Done in 28549ms.
+Start Iteration 5 (max: 10) with current residuum 50767321.10636696 (target: 21734.651744775107). Done in 28540ms.
+Start Iteration 6 (max: 10) with current residuum 4477814.367022422 (target: 21734.651744775107). Done in 28547ms.
+Start Iteration 7 (max: 10) with current residuum 95382418.67116101 (target: 21734.651744775107). Done in 28549ms.
+Start Iteration 8 (max: 10) with current residuum 682700.0210992637 (target: 21734.651744775107). Done in 28542ms.
+Start Iteration 9 (max: 10) with current residuum 53398.287133715836 (target: 21734.651744775107). Done in 28543ms.
+Finished after 9 iterations with a residuum of 2252.1995689716136 (target: 21734.651744775107) and an average iteration time of 28543ms.
+Solved minimization problem (r = b - Ax) using CG in 271226ms.
+
+Optimization finished
+svm_type c_svc
+kernel_type linear
+nr_class 2
+total_sv 100000
+rho 0.03826560253113198
+label 1 -1
+nr_sv 50000 50000
+SV
+
+Wrote model file ('data_file.libsvm.model') with 100000 support vectors in 82ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4573                                 00:04:32                                  
+4573.0           23136K     23136K   00:04:32          0    533724K    533724K 

@@ -1,0 +1,53 @@
+Loading openmpi/4.0.4-gcc-10.2
+  Loading requirement: gcc/10.2
+;0.253721
+Read 100000 data points with 10 features in 1559ms using the libsvm parser.
+Using OpenMP as backend.
+
+Setup for solving the optimization problem done in 531ms.
+;1.11116
+Start Iteration 1 (max: 10) with current residuum 2.173465174477511e+16 (target: 21734.65174477511).
+;1.12595
+;1.08151
+Start Iteration 2 (max: 10) with current residuum 78379413245756.47 (target: 21734.65174477511).
+;1.10956
+;1.13365
+Start Iteration 3 (max: 10) with current residuum 1942374639.7912202 (target: 21734.65174477511).
+;1.09478
+;1.06744
+Start Iteration 4 (max: 10) with current residuum 303207640.84141254 (target: 21734.65174477511).
+;1.12475
+;1.17242
+Start Iteration 5 (max: 10) with current residuum 50767321.11065386 (target: 21734.65174477511).
+;1.11499
+;1.11905
+Start Iteration 6 (max: 10) with current residuum 4477989.8816657 (target: 21734.65174477511).
+;1.0977
+;1.07135
+Start Iteration 7 (max: 10) with current residuum 121100469.94705664 (target: 21734.65174477511).
+;1.06539
+;1.14314
+Start Iteration 8 (max: 10) with current residuum 681659.8512984467 (target: 21734.65174477511).
+;1.16045
+;1.10782
+Start Iteration 9 (max: 10) with current residuum 53398.15669460855 (target: 21734.65174477511).
+;1.10421
+;1.08225
+Finished after 9 iterations with a residuum of 2063.9417469619816 (target: 21734.65174477511).
+Solved minimization problem (r = b - Ax) using CG in 25778ms.
+
+Optimization finished
+svm_type c_svc
+kernel_type linear
+nr_class 2
+total_sv 100000
+rho 0.033461754263489074
+label 1 -1
+nr_sv 50000 50000
+SV
+
+Wrote model file with 100000 support vectors in 34756ms.
+       JobID     AveRSS     MaxRSS    Elapsed MaxRSSTask  AveVMSize  MaxVMSize 
+------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+4564                                 00:01:07                                  
+4564.0         25177170     61596K   00:01:06         32  730101696    771624K 
