@@ -269,11 +269,6 @@ void csvm<T>::learn() {
 
     PLSSVM_ASSERT(!data_ptr_->empty(), "Data set is empty!");  // exception in constructor
 
-    std::vector<real_type> q(num_data_points_ - 1, 0);
-    std::vector<real_type> b(num_data_points_ - 1, 0);
-
-    b = *value_ptr_;
-
     // setup the data on the device
     setup_data_on_device();
 
@@ -284,10 +279,15 @@ void csvm<T>::learn() {
     MPI_Comm_set_errhandler(MPI_COMM_WORLD, MPI_ERRORS_RETURN);
 
     MPI_Datatype mpi_real_type;
-    MPI_Type_match_size(MPI_TYPECLASS_REAL, 4, &mpi_real_type);
+    MPI_Type_match_size(MPI_TYPECLASS_REAL, sizeof(real_type), &mpi_real_type);
 
     MPI_Bcast(&num_data_points_, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&num_features_, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    std::vector<real_type> q(num_data_points_ - 1, 0);
+    std::vector<real_type> b(num_data_points_ - 1, 0);
+
+    b = *value_ptr_;
 
     auto start_time = std::chrono::steady_clock::now();
 
