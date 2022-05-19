@@ -46,6 +46,13 @@ void initialize_mpi_openmp(){
     return;
 }
 
+void finalize_mpi_openmp(int current_type_size, plssvm::kernel_type current_kernel_type){
+    if(current_type_size == 8 && current_kernel_type == plssvm::kernel_type::rbf){
+        MPI_Finalize();
+    }
+    return;
+}
+
 template <typename T>
 class OpenMP_CSVM : public ::testing::Test {};
 TYPED_TEST_SUITE(OpenMP_CSVM, parameter_types, util::google_test::parameter_definition_to_name);
@@ -80,8 +87,11 @@ TYPED_TEST(OpenMP_CSVM, constructor_invalid_target_platform) {
 // check whether writing the resulting model file is correct
 TYPED_TEST(OpenMP_CSVM, write_model) {
     initialize_mpi_openmp();
+
     generic::write_model_test<mock_openmp_csvm, typename TypeParam::real_type, TypeParam::kernel>();
-    // MPI_Finalize();
+
+    typename TypeParam::real_type temp = 0;
+    finalize_mpi_openmp(sizeof(temp), TypeParam::kernel);
 }
 
 // check whether the q vector is generated correctly
@@ -139,7 +149,9 @@ TYPED_TEST(OpenMP_CSVM, device_kernel) {
             util::gtest_assert_floating_point_near(correct[index], calculated[index], fmt::format("\tindex: {}, add: {}", index, add));
         }
     }
-    // MPI_Finalize();
+
+    typename TypeParam::real_type temp = 0;
+    finalize_mpi_openmp(sizeof(temp), TypeParam::kernel);
 }
 
 // check whether the correct labels are predicted
@@ -151,5 +163,7 @@ TYPED_TEST(OpenMP_CSVM, predict) {
 TYPED_TEST(OpenMP_CSVM, accuracy) {
     initialize_mpi_openmp();
     generic::accuracy_test<mock_openmp_csvm, typename TypeParam::real_type, TypeParam::kernel>();
-    // MPI_Finalize();
+
+    typename TypeParam::real_type temp = 0;
+    finalize_mpi_openmp(sizeof(temp), TypeParam::kernel);
 }

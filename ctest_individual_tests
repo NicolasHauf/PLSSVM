@@ -1,0 +1,336 @@
+Test project /home/nic/GitHub/SVM/build
+    Start 1: Base.backend_type
+1/1 Test #1: Base.backend_type ................   Passed    0.60 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.62 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 2: Base.kernel_type
+1/1 Test #2: Base.kernel_type .................   Passed    0.62 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.63 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 3: Base.target_platform
+1/1 Test #3: Base.target_platform .............   Passed    0.62 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.63 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 4: Base.arithmetic_type_name
+1/1 Test #4: Base.arithmetic_type_name ........   Passed    0.59 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.61 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 5: BaseDeathTest.plssvm_assert
+1/1 Test #5: BaseDeathTest.plssvm_assert ......   Passed    0.62 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.63 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 6: BaseKernelFunction/*.kernel_function
+1/1 Test #6: BaseKernelFunction/*.kernel_function ...   Passed    0.61 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.63 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 7: BaseCSVMTransform/*.transform_data
+1/1 Test #7: BaseCSVMTransform/*.transform_data ...   Passed    0.60 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.61 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 8: BaseCSVM/*.constructor
+1/1 Test #8: BaseCSVM/*.constructor ...........   Passed    0.62 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.63 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 9: BaseCSVM/*.constructor_exceptions
+1/1 Test #9: BaseCSVM/*.constructor_exceptions ...   Passed    0.60 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.61 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 10: BaseCSVM/*.write_model_exceptions
+1/1 Test #10: BaseCSVM/*.write_model_exceptions ...   Passed    0.62 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.63 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 11: BaseCSVM/*.kernel_function
+1/1 Test #11: BaseCSVM/*.kernel_function .......   Passed    0.62 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.63 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 12: BaseCSVM/*.learn
+1/1 Test #12: BaseCSVM/*.learn .................   Passed    0.67 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.68 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 13: BaseCSVM/*.learn_exceptions
+1/1 Test #13: BaseCSVM/*.learn_exceptions ......   Passed    0.67 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.68 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 14: BaseCSVM/*.accuracy_empty_points
+1/1 Test #14: BaseCSVM/*.accuracy_empty_points ...   Passed    0.60 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.61 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 15: BaseCSVM/*.accuracy_exceptions
+1/1 Test #15: BaseCSVM/*.accuracy_exceptions ...   Passed    0.61 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.62 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 16: BaseCSVM/*.predict_label_empty_points
+1/1 Test #16: BaseCSVM/*.predict_label_empty_points ...   Passed    0.60 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.61 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 17: BaseCSVM/*.predict_label_exceptions
+1/1 Test #17: BaseCSVM/*.predict_label_exceptions ...   Passed    0.61 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.62 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 18: BaseCSVM/*.predict_exceptions
+1/1 Test #18: BaseCSVM/*.predict_exceptions ....   Passed    0.60 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.61 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 19: Parameter/*.default_constructor
+1/1 Test #19: Parameter/*.default_constructor ...   Passed    0.60 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.62 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 20: Parameter/*.parse_libsvm
+1/1 Test #20: Parameter/*.parse_libsvm .........   Passed    0.61 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.62 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 21: Parameter/*.parse_libsvm_sparse
+1/1 Test #21: Parameter/*.parse_libsvm_sparse ...   Passed    0.61 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.62 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 22: Parameter/*.parse_libsvm_gamma
+1/1 Test #22: Parameter/*.parse_libsvm_gamma ...   Passed    0.61 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.62 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 23: Parameter/*.parse_libsvm_ill_formed
+1/1 Test #23: Parameter/*.parse_libsvm_ill_formed ...   Passed    0.61 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.62 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 24: Parameter/*.parse_libsvm_non_existing_file
+1/1 Test #24: Parameter/*.parse_libsvm_non_existing_file ...   Passed    0.60 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.61 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 25: Parameter/*.parse_arff
+1/1 Test #25: Parameter/*.parse_arff ...........   Passed    0.61 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.62 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 26: Parameter/*.parse_arff_gamma
+1/1 Test #26: Parameter/*.parse_arff_gamma .....   Passed    0.61 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.62 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 27: Parameter/*.parse_arff_ill_formed
+1/1 Test #27: Parameter/*.parse_arff_ill_formed ...   Passed    0.63 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.65 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 28: Parameter/*.parse_arff_non_existing_file
+1/1 Test #28: Parameter/*.parse_arff_non_existing_file ...   Passed    0.59 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.61 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 29: Parameter/*.parse_file
+1/1 Test #29: Parameter/*.parse_file ...........   Passed    0.61 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.63 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 30: Parameter/*.parse_train_file
+1/1 Test #30: Parameter/*.parse_train_file .....   Passed    0.60 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.61 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 31: Parameter/*.parse_test_file
+1/1 Test #31: Parameter/*.parse_test_file ......   Passed    0.64 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.65 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 32: ParameterModel/*.parse_model_file
+1/1 Test #32: ParameterModel/*.parse_model_file ...   Passed    0.61 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.62 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 33: ParameterModel/*.parse_model_ill_formed
+1/1 Test #33: ParameterModel/*.parse_model_ill_formed ...   Passed    0.77 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.79 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 34: ParameterModel/*.parse_model_non_existing_file
+1/1 Test #34: ParameterModel/*.parse_model_non_existing_file ...   Passed    0.62 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.63 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 35: Parameter/*.output_operator
+1/1 Test #35: Parameter/*.output_operator ......   Passed    0.61 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.62 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 36: ParameterTrain/*.parse_filename
+1/1 Test #36: ParameterTrain/*.parse_filename ...   Passed    0.60 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.61 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 37: ParameterTrain/*.parse_command_line_arguments
+1/1 Test #37: ParameterTrain/*.parse_command_line_arguments ...   Passed    0.69 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.70 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 38: ParameterPredict/*.parse_filename
+1/1 Test #38: ParameterPredict/*.parse_filename ...   Passed    0.61 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.63 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 39: ParameterPredict/*.parse_command_line_arguments
+1/1 Test #39: ParameterPredict/*.parse_command_line_arguments ...   Passed    0.63 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.65 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 40: ParameterTrain/svm-train_help
+1/1 Test #40: ParameterTrain/svm-train_help ....   Passed    0.67 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.68 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 41: ParameterPredict/svm-predict_help
+1/1 Test #41: ParameterPredict/svm-predict_help ...   Passed    0.62 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.63 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 42: OpenMP_CSVM/*.csvm_factory
+1/1 Test #42: OpenMP_CSVM/*.csvm_factory .......   Passed    0.61 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.62 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 43: OpenMP_CSVM/*.constructor_invalid_target_platform
+1/1 Test #43: OpenMP_CSVM/*.constructor_invalid_target_platform ...   Passed    0.60 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.61 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 44: OpenMP_CSVM/*.write_model
+1/1 Test #44: OpenMP_CSVM/*.write_model ........   Passed    0.72 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   0.73 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 45: OpenMP_CSVM/*.generate_q
+1/1 Test #45: OpenMP_CSVM/*.generate_q .........   Passed    2.09 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   2.11 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 46: OpenMP_CSVM/*.device_kernel
+1/1 Test #46: OpenMP_CSVM/*.device_kernel ......   Passed  544.12 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) = 544.40 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 47: OpenMP_CSVM/*.predict
+1/1 Test #47: OpenMP_CSVM/*.predict ............   Passed    2.00 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) =   2.04 sec
+Test project /home/nic/GitHub/SVM/build
+    Start 48: OpenMP_CSVM/*.accuracy
+1/1 Test #48: OpenMP_CSVM/*.accuracy ...........   Passed  374.01 sec
+
+[0;32m100% tests passed[0;0m, 0 tests failed[0;0m out of 1
+
+Total Test time (real) = 374.03 sec

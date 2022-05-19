@@ -72,6 +72,7 @@ parameter_train<T>::parameter_train(int argc, char **argv) {
         if (rank == 0) {
             fmt::print("{}\n{}\n", e.what(), options.help());
         }
+        MPI_Finalize();
         std::exit(EXIT_FAILURE);
     }
 
@@ -80,6 +81,7 @@ parameter_train<T>::parameter_train(int argc, char **argv) {
         if (rank == 0) {
             fmt::print("{}", options.help());
         }
+        MPI_Finalize();
         std::exit(EXIT_SUCCESS);
     }
 
@@ -97,6 +99,7 @@ parameter_train<T>::parameter_train(int argc, char **argv) {
                 fmt::print(stderr, "gamma = 0.0 is not allowed, it doesnt make any sense!\n");
                 fmt::print("{}", options.help());
             }
+            MPI_Finalize();
             std::exit(EXIT_FAILURE);
         }
     } else {
@@ -130,6 +133,7 @@ parameter_train<T>::parameter_train(int argc, char **argv) {
             fmt::print(stderr, "Error missing input file!");
             fmt::print("{}", options.help());
         }
+        MPI_Finalize();
         std::exit(EXIT_FAILURE);
     }
     input_filename = result["input"].as<decltype(input_filename)>();

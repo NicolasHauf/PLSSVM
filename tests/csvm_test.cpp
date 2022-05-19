@@ -45,6 +45,13 @@ void initialize_mpi_csvm(){
     return;
 }
 
+void finalize_mpi_csvm(int current_type_size, plssvm::kernel_type current_kernel_type){
+    if(current_type_size == 8 && current_kernel_type == plssvm::kernel_type::rbf){
+        MPI_Finalize();
+    }
+    return;
+}
+
 template <typename T>
 class BaseCSVMTransform : public ::testing::Test {};
 TYPED_TEST_SUITE(BaseCSVMTransform, floating_point_types);
@@ -229,6 +236,7 @@ TYPED_TEST(BaseCSVM, learn) {
     params.print_info = false;
     params.kernel = TypeParam::kernel;
 
+
     params.parse_train_file(PLSSVM_TEST_PATH "/data/libsvm/5x4.libsvm");
 
     // create C-SVM
@@ -240,7 +248,8 @@ TYPED_TEST(BaseCSVM, learn) {
 
     csvm.learn();
 
-    // MPI_Finalize();
+    typename TypeParam::real_type temp = 0;
+    finalize_mpi_csvm(sizeof(temp), TypeParam::kernel);
 }
 
 // check whether plssvm::csvm<T>::learn() with wrong data correctly fails
@@ -270,7 +279,8 @@ TYPED_TEST(BaseCSVM, learn_exceptions) {
     csvm.get_value_ptr() = std::make_shared<const std::vector<typename TypeParam::real_type>>();
     EXPECT_THROW_WHAT(csvm.learn(), plssvm::exception, "Number of labels (0) must match the number of data points (5)!");
 
-    // MPI_Finalize();
+    typename TypeParam::real_type temp = 0;
+    finalize_mpi_csvm(sizeof(temp), TypeParam::kernel);
 }
 
 // check whether plssvm::csvm<T>::accuracy() with an empty points vector returns an accuracy of 0

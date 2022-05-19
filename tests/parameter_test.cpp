@@ -69,26 +69,18 @@ void initialize_mpi_parameter(){
     return;
 }
 
+void finalize_mpi_parameter(int current_type_size){
+    if(current_type_size == 8){
+        MPI_Finalize();
+    }
+    return;
+}
+
 // the floating point types to test
 using floating_point_types = ::testing::Types<float, double>;
 
 template <typename T>
-class Parameter : public ::testing::Test {
-    //Parameter();
-    //~Parameter();
-};
-
-/*
-Parameter::Parameter(void){
-    MPI_Init(NULL, NULL);
-    std::cout << "Object created" << std::endl;
-}
-
-Parameter::~Parameter(void){
-    MPI_Finalize();
-    std::cout << "Object deleted" << std::endl;
-}
-*/
+class Parameter : public ::testing::Test {};
 
 TYPED_TEST_SUITE(Parameter, floating_point_types);
 
@@ -763,7 +755,7 @@ TYPED_TEST(ParameterTrain, parse_command_line_arguments) {
 
     EXPECT_EQ(params.rho, real_type{ 0 });
 
-    // MPI_Finalize();
+    finalize_mpi_parameter(sizeof(real_type));
 }
 
 //*************************************************************************************************************************************//
